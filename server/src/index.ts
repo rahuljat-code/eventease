@@ -13,7 +13,9 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+// In production, restrict to the deployed frontend (set FRONTEND_URL on Render).
+// Locally, FRONTEND_URL is unset so all origins are allowed for convenience.
+app.use(cors({ origin: process.env.FRONTEND_URL ?? "*" }));
 app.use(express.json());
 
 app.get("/api/health", (_req, res) => {

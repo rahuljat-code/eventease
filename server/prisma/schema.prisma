@@ -21,8 +21,9 @@ generator client {
 // second line —  directUrl = env("DIRECT_URL")  — because Supabase runs normal
 // queries through a pooler but migrations must bypass it.
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooled connection used by the app
+  directUrl = env("DIRECT_URL")   // direct connection used for migrations (Supabase)
 }
 
 enum Role {
