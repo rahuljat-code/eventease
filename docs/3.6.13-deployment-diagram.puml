@@ -1,0 +1,27 @@
+@startuml
+title EventEase - Deployment Diagram
+
+skinparam shadowing false
+skinparam linetype ortho
+
+node "User Device" <<device>> {
+  artifact "Web Browser\n(React SPA)" as browser
+}
+
+node "Vercel" <<cloud>> {
+  artifact "Frontend\n(React + Vite build)" as frontend
+}
+
+node "Render" <<cloud>> {
+  artifact "Backend API\n(Node + Express)" as backend
+}
+
+node "Supabase" <<cloud>> {
+  database "PostgreSQL" as pg
+}
+
+browser --> frontend : HTTPS (loads the app)
+browser --> backend : HTTPS · REST + JWT
+backend --> pg : SQL over TLS (Prisma)
+
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+title EventEase - Package Diagram
+
+skinparam shadowing false
+skinparam packageStyle folder
+skinparam linetype ortho
+
+package "Client (React + Vite)" {
+  package "pages" as pages
+  package "components" as components
+  package "context" as context
+  package "lib (api, types)" as clientlib
+}
+
+package "Server (Node + Express)" {
+  package "routes" as routes
+  package "middleware" as middleware
+  package "lib (Prisma client)" as serverlib
+  package "prisma (schema, seed)" as prisma
+}
+
+database "PostgreSQL" as db
+
+pages ..> components
+pages ..> context
+pages ..> clientlib
+components ..> context
+context ..> clientlib
+clientlib ..> routes : HTTP / JSON (Axios)
+
+routes ..> middleware
+routes ..> serverlib
+serverlib ..> db : SQL (Prisma)
+prisma ..> db : migrations
+
+@enduml

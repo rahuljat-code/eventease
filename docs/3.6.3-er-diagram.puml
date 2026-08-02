@@ -1,0 +1,98 @@
+@startuml
+title EventEase - Entity Relationship Diagram
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam roundCorner 8
+
+entity "Classes" as Classes {
+  id : int
+  name : varchar
+  course : varchar
+  year : int
+}
+
+entity "Subjects" as Subjects {
+  id : int
+  class_id : int
+  name : varchar
+  code : varchar
+}
+
+entity "Users" as Users {
+  id : int
+  name : varchar
+  email : varchar
+  password_hash : varchar
+  role : enum
+  roll_no : varchar
+  uid : varchar
+  class_id : int
+  team_id : int
+}
+
+entity "Clubs" as Clubs {
+  id : int
+  name : varchar
+  category : varchar
+  president_id : int
+}
+
+entity "Teams" as Teams {
+  id : int
+  name : varchar
+  club_id : int
+  head_id : int
+}
+
+entity "Events" as Events {
+  id : int
+  name : varchar
+  event_date : date
+  venue : varchar
+  status : enum
+  club_id : int
+}
+
+entity "Attendance Requests" as Requests {
+  id : int
+  volunteer_id : int
+  event_id : int
+  subject_id : int
+  lecture_date : date
+  lecture_time : time
+  teacher_name : varchar
+  reason : text
+  status : enum
+  head_action_by : int
+  head_action_at : timestamp
+  head_remark : text
+  president_action_by : int
+  president_action_at : timestamp
+  president_remark : text
+}
+
+entity "CC Credits" as Credits {
+  id : int
+  volunteer_id : int
+  event_id : int
+  credit_points : int
+  awarded_by : int
+  verified_by : int
+  verified_at : timestamp
+}
+
+Classes ||--o{ Subjects : has
+Classes ||--o{ Users : contains
+Clubs ||--o{ Teams : has
+Clubs ||--o{ Events : organizes
+Teams ||--o{ Users : has
+Users ||--o{ Clubs : leads
+Users ||--o{ Teams : heads
+Users ||--o{ Requests : submits
+Events ||--o{ Requests : for
+Subjects ||--o{ Requests : missed
+Users ||--o{ Credits : receives
+Events ||--o{ Credits : for
+
+@enduml

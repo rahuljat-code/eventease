@@ -1,0 +1,13 @@
+// The main server tsconfig only compiles src/, so the editor would otherwise
+// not know how to type-check the standalone seed script (e.g. it wouldn't find
+// Node's `process`). This small config covers the prisma/ scripts, which are
+// run with ts-node, never built into dist/.
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "types": ["node"],
+    "noEmit": true
+  },
+  "include": ["**/*.ts"]
+}

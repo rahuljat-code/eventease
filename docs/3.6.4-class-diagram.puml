@@ -1,0 +1,165 @@
+@startuml
+title EventEase - Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+skinparam roundCorner 8
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam packageStyle rectangle
+
+package "User Management" {
+
+class User{
++id : int
++name : varchar
++email : varchar
++password_hash : varchar
++role : varchar
+--
++login()
++logout()
++updateProfile()
+}
+
+class Volunteer{
++rollNo : varchar
++uid : varchar
+--
++selectTeam()
++submitAttendanceRequest()
++viewMyCCCredits()
+}
+
+class "Team Head" as TeamHead{
++approveAttendanceRequest()
++rejectAttendanceRequest()
++awardCCCredits()
+}
+
+class President{
++createTeam()
++assignTeamHead()
++createEvent()
++verifyAttendanceRequest()
++verifyCCCredits()
+}
+
+class Admin{
++createClub()
++assignPresident()
++manageClasses()
++manageSubjects()
+}
+
+class Teacher{
++downloadAttendanceReport()
++downloadCCReport()
+}
+
+User <|-- Volunteer
+User <|-- TeamHead
+User <|-- President
+User <|-- Admin
+User <|-- Teacher
+
+}
+
+package "Core Modules" {
+
+class Club{
++id : int
++name : varchar
++category : varchar
+}
+
+class Team{
++id : int
++name : varchar
+}
+
+class Event{
++id : int
++name : varchar
++eventDate : date
++venue : varchar
++status : varchar
+}
+
+class "Class" as AcademicClass{
++id : int
++name : varchar
++course : varchar
++year : int
+}
+
+class Subject{
++id : int
++name : varchar
++code : varchar
+}
+
+class AttendanceRequest{
++id : int
++lectureDate : date
++lectureTime : time
++teacherName : varchar
++reason : text
++status : varchar
++headActionAt : timestamp
++headRemark : text
++presidentActionAt : timestamp
++presidentRemark : text
+}
+
+class CCCredit{
++id : int
++creditPoints : int
++verifiedAt : timestamp
+}
+
+}
+
+'==========================
+' Relationships
+'==========================
+
+Admin "1" -- "*" Club : creates
+
+President "1" -- "1" Club : leads
+
+Club "1" -- "*" Team : has
+Club "1" -- "*" Event : organizes
+
+TeamHead "1" -- "1" Team : heads
+
+Team "1" -- "*" Volunteer : includes
+
+AcademicClass "1" -- "*" Volunteer : contains
+
+AcademicClass "1" -- "*" Subject : has
+
+Volunteer "1" -- "*" AttendanceRequest : submits
+
+Subject "1" -- "*" AttendanceRequest : missed
+
+Event "1" -- "*" AttendanceRequest : for
+
+TeamHead "1" -- "*" AttendanceRequest : approves
+
+President "1" -- "*" AttendanceRequest : verifies
+
+Volunteer "1" -- "*" CCCredit : receives
+
+Event "1" -- "*" CCCredit : for
+
+TeamHead "1" -- "*" CCCredit : awards
+
+President "1" -- "*" CCCredit : verifies
+
+Teacher ..> AttendanceRequest : downloads
+
+Teacher ..> CCCredit : downloads
+
+@enduml

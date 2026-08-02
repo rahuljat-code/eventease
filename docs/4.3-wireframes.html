@@ -1,0 +1,522 @@
+<title>EventEase — 4.3 User Interface Design (Wireframes)</title>
+<style>
+  /* Wireframes are a deliberate single-look: greyscale, print-oriented.
+     No brand colour, no dark theme — this is a design spec, not the product. */
+  :root {
+    --ground: #ffffff;
+    --paper: #f6f7f8;
+    --ink: #1f2124;
+    --muted: #8a9099;
+    --line: #c4c7cc;
+    --dash: #b0b4ba;
+    --fill: #eef0f2;
+    --fill-strong: #dcdfe4;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, "Liberation Mono", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+  }
+
+  /* ---- document header ---- */
+  .doc-head { display: flex; flex-direction: column; gap: 10px; }
+  .doc-head h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .doc-head .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .doc-head p {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 14px;
+    color: #4a4e54;
+  }
+  .doc-head .note {
+    font-size: 13px;
+    color: var(--muted);
+    border-left: 3px solid var(--line);
+    padding-left: 12px;
+  }
+
+  /* ---- figure + frame ---- */
+  figure { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  figcaption {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+  figcaption b { font-weight: 600; }
+  figcaption span { color: var(--muted); }
+
+  .frame {
+    background: var(--ground);
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .frame__bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    background: var(--fill);
+    border-bottom: 1.5px solid var(--line);
+  }
+  .dots { display: flex; gap: 5px; }
+  .dots i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--dash); }
+  .frame__route {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .screen { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* ---- app top bar (dashboards) ---- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    background: var(--fill);
+  }
+  .brand { font-weight: 700; letter-spacing: -0.01em; }
+  .topbar .who { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #4a4e54; }
+  .role {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border: 1.5px solid var(--dash);
+    border-radius: 3px;
+    color: var(--muted);
+  }
+
+  /* ---- generic screen pieces ---- */
+  .section { display: flex; flex-direction: column; gap: 10px; }
+  .section__head { display: flex; align-items: center; justify-content: space-between; }
+  h2.title { margin: 0; font-size: 15px; font-weight: 650; }
+  .sub { font-size: 12.5px; color: var(--muted); }
+
+  .region {
+    border: 1.5px dashed var(--dash);
+    border-radius: 5px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #fcfcfd;
+  }
+
+  /* form field: label above an empty input box */
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field > label { font-size: 12px; color: #4a4e54; font-weight: 600; }
+  .input {
+    height: 34px;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    background: var(--ground);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .input.sel::after { content: "▾"; margin-left: auto; color: var(--dash); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+  /* buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 14px;
+    border: 1.5px solid var(--dash);
+    border-radius: 4px;
+    background: var(--ground);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .btn.primary { background: var(--fill-strong); border-color: #9aa0a8; }
+  .btn.wide { width: 100%; }
+  .btn.sm { height: 26px; padding: 0 10px; font-size: 11.5px; }
+  .btn.danger { border-style: dashed; color: #4a4e54; }
+  .btnrow { display: flex; gap: 8px; }
+
+  .link { font-size: 12.5px; color: var(--muted); text-align: center; }
+  .link u { text-underline-offset: 2px; }
+
+  /* profile info grid (volunteer) */
+  .info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 18px; }
+  .info div { display: flex; flex-direction: column; gap: 2px; }
+  .info .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .info .v { height: 15px; border-bottom: 1.5px solid var(--line); }
+
+  /* list rows */
+  .list { display: flex; flex-direction: column; }
+  .item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 11px 4px;
+    border-bottom: 1.5px solid var(--fill);
+  }
+  .item:last-child { border-bottom: 0; }
+  .item .lines { display: flex; flex-direction: column; gap: 5px; min-width: 0; flex: 1; }
+  .ln { height: 9px; border-radius: 2px; background: var(--fill); }
+  .ln.w70 { width: 70%; }
+  .ln.w45 { width: 45%; }
+  .ln.w55 { width: 55%; }
+  .ln.strong { background: var(--fill-strong); height: 11px; }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.03em;
+    padding: 3px 8px;
+    border: 1.5px solid var(--dash);
+    border-radius: 999px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* tabs */
+  .tabs { display: inline-flex; border: 1.5px solid var(--line); border-radius: 5px; overflow: hidden; }
+  .tabs span { font-size: 12px; padding: 5px 12px; color: var(--muted); }
+  .tabs span.on { background: var(--fill-strong); color: var(--ink); font-weight: 600; }
+
+  /* table (admin) */
+  .table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .table th, .table td { border: 1.5px solid var(--line); padding: 8px 10px; text-align: left; }
+  .table th { background: var(--fill); font-weight: 600; color: #4a4e54; font-size: 11.5px; }
+  .table td .ln { height: 8px; }
+  .cellactions { display: flex; gap: 10px; }
+  .cellactions u { font-size: 11.5px; color: var(--muted); text-underline-offset: 2px; }
+
+  .roster { display: flex; flex-direction: column; }
+
+  /* two-up for the form figures */
+  .narrow { max-width: 420px; }
+
+  @media (max-width: 560px) {
+    .grid2, .grid3, .info { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="doc-head">
+    <div class="eyebrow">EventEase · Chapter 4 — System Design</div>
+    <h1>4.3 User Interface Design (Wireframes)</h1>
+    <p>
+      Low-fidelity wireframes for each screen of EventEase, showing layout and
+      structure before styling. Each frame is labelled with its figure number and
+      the route it maps to.
+    </p>
+    <p class="note">
+      These are design wireframes — deliberately greyscale, with placeholder
+      content. The finished, styled screens appear as screenshots in the User
+      Manual section.
+    </p>
+  </header>
+
+  <!-- 4.3.1 LOGIN -->
+  <figure>
+    <figcaption><b>Fig 4.3.1</b> — <span>Login screen</span></figcaption>
+    <div class="frame">
+      <div class="frame__bar"><span class="dots"><i></i><i></i><i></i></span><span class="frame__route">/login</span></div>
+      <div class="screen">
+        <div class="region narrow" style="margin: 0 auto; width: 100%;">
+          <div style="text-align:center; display:flex; flex-direction:column; gap:3px;">
+            <div class="brand">EventEase</div>
+            <div class="sub">Sign in to your account</div>
+          </div>
+          <div class="field"><label>Email</label><div class="input">you@college.edu</div></div>
+          <div class="field"><label>Password</label><div class="input">••••••••</div></div>
+          <div class="btn primary wide">Sign in</div>
+          <div class="link">No account? <u>Register</u></div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- 4.3.2 REGISTER -->
+  <figure>
+    <figcaption><b>Fig 4.3.2</b> — <span>Registration screen</span></figcaption>
+    <div class="frame">
+      <div class="frame__bar"><span class="dots"><i></i><i></i><i></i></span><span class="frame__route">/register</span></div>
+      <div class="screen">
+        <div class="region narrow" style="margin: 0 auto; width: 100%;">
+          <div style="text-align:center; display:flex; flex-direction:column; gap:3px;">
+            <div class="brand">Create your account</div>
+            <div class="sub">You will be registered as a volunteer</div>
+          </div>
+          <div class="field"><label>Full name</label><div class="input">Rahul Jat</div></div>
+          <div class="field"><label>Email</label><div class="input">you@college.edu</div></div>
+          <div class="field"><label>Password</label><div class="input">••••••••</div></div>
+          <div class="grid2">
+            <div class="field"><label>Roll number</label><div class="input">44</div></div>
+            <div class="field"><label>UID</label><div class="input">24BIT044</div></div>
+          </div>
+          <div class="field"><label>Class</label><div class="input sel">Select your class</div></div>
+          <div class="btn primary wide">Register</div>
+          <div class="link">Already have an account? <u>Sign in</u></div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- 4.3.3 VOLUNTEER -->
+  <figure>
+    <figcaption><b>Fig 4.3.3</b> — <span>Volunteer dashboard</span></figcaption>
+    <div class="frame">
+      <div class="frame__bar"><span class="dots"><i></i><i></i><i></i></span><span class="frame__route">/volunteer</span></div>
+      <div class="screen">
+        <div class="topbar">
+          <span class="brand">EventEase</span>
+          <span class="who">Rahul Jat <span class="role">VOLUNTEER</span> <span class="btn sm">Log out</span></span>
+        </div>
+
+        <div class="region">
+          <div class="info">
+            <div><span class="k">Name</span><span class="v"></span></div>
+            <div><span class="k">UID</span><span class="v"></span></div>
+            <div><span class="k">Roll No.</span><span class="v"></span></div>
+            <div><span class="k">Class</span><span class="v"></span></div>
+            <div><span class="k">Team</span><span class="v"></span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section__head"><h2 class="title">My Team</h2><span class="btn sm">Change team</span></div>
+          <div class="sub">You are on Events Team, Dot Com Club. Requests go to this team's head.</div>
+        </div>
+
+        <div class="section">
+          <div class="section__head"><h2 class="title">My Attendance Requests</h2><span class="btn primary sm">+ New request</span></div>
+          <div class="list">
+            <div class="item">
+              <div class="lines"><div class="ln strong w55"></div><div class="ln w70"></div></div>
+              <span class="badge">APPROVED</span>
+            </div>
+            <div class="item">
+              <div class="lines"><div class="ln strong w45"></div><div class="ln w70"></div></div>
+              <span class="badge">PENDING HEAD</span>
+              <span class="cellactions"><u>Withdraw</u></span>
+            </div>
+            <div class="item">
+              <div class="lines"><div class="ln strong w55"></div><div class="ln w70"></div></div>
+              <span class="badge">REJECTED</span>
+              <span class="cellactions"><u>Edit &amp; resubmit</u></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- 4.3.4 TEAM HEAD -->
+  <figure>
+    <figcaption><b>Fig 4.3.4</b> — <span>Team Head dashboard</span></figcaption>
+    <div class="frame">
+      <div class="frame__bar"><span class="dots"><i></i><i></i><i></i></span><span class="frame__route">/team-head</span></div>
+      <div class="screen">
+        <div class="topbar">
+          <span class="brand">EventEase</span>
+          <span class="who">Sana Khan <span class="role">TEAM_HEAD</span> <span class="btn sm">Log out</span></span>
+        </div>
+
+        <div class="section">
+          <h2 class="title">My Team <span class="sub">— Events Team · Dot Com Club</span></h2>
+          <div class="region roster">
+            <div class="item"><div class="lines"><div class="ln strong w45"></div></div><div class="ln w45" style="max-width:180px"></div></div>
+            <div class="item"><div class="lines"><div class="ln strong w55"></div></div><div class="ln w45" style="max-width:180px"></div></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section__head">
+            <h2 class="title">Pending Attendance Requests</h2>
+            <span class="tabs"><span class="on">Pending</span><span>History</span></span>
+          </div>
+          <div class="list">
+            <div class="item">
+              <div class="lines"><div class="ln strong w55"></div><div class="ln w70"></div><div class="ln w45"></div></div>
+              <span class="btnrow"><span class="btn primary sm">Approve</span><span class="btn danger sm">Reject</span></span>
+            </div>
+            <div class="item">
+              <div class="lines"><div class="ln strong w45"></div><div class="ln w70"></div><div class="ln w45"></div></div>
+              <span class="btnrow"><span class="btn primary sm">Approve</span><span class="btn danger sm">Reject</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- 4.3.5 PRESIDENT -->
+  <figure>
+    <figcaption><b>Fig 4.3.5</b> — <span>President dashboard</span></figcaption>
+    <div class="frame">
+      <div class="frame__bar"><span class="dots"><i></i><i></i><i></i></span><span class="frame__route">/president</span></div>
+      <div class="screen">
+        <div class="topbar">
+          <span class="brand">EventEase</span>
+          <span class="who">Priya Nair <span class="role">PRESIDENT</span> <span class="btn sm">Log out</span></span>
+        </div>
+
+        <div class="section">
+          <div class="section__head"><h2 class="title">Events</h2><span class="btn primary sm">+ New event</span></div>
+          <div class="list">
+            <div class="item"><div class="lines"><div class="ln strong w45"></div><div class="ln w55"></div></div><span class="input sel sm" style="width:120px;height:26px">Ongoing</span><span class="cellactions"><u>Edit</u><u>Delete</u></span></div>
+            <div class="item"><div class="lines"><div class="ln strong w55"></div><div class="ln w55"></div></div><span class="input sel sm" style="width:120px;height:26px">Upcoming</span><span class="cellactions"><u>Edit</u><u>Delete</u></span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section__head"><h2 class="title">Teams</h2><span class="btn primary sm">+ New team</span></div>
+          <div class="list">
+            <div class="item"><div class="lines"><div class="ln strong w45"></div><div class="ln w45"></div></div><span class="cellactions"><u>Assign head</u><u>Delete</u></span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section__head">
+            <h2 class="title">Requests to Verify</h2>
+            <span class="tabs"><span class="on">Pending</span><span>History</span></span>
+          </div>
+          <div class="list">
+            <div class="item">
+              <div class="lines"><div class="ln strong w55"></div><div class="ln w70"></div><div class="ln w45"></div></div>
+              <span class="btnrow"><span class="btn primary sm">Verify</span><span class="btn danger sm">Reject</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- 4.3.6 ADMIN -->
+  <figure>
+    <figcaption><b>Fig 4.3.6</b> — <span>Admin dashboard</span></figcaption>
+    <div class="frame">
+      <div class="frame__bar"><span class="dots"><i></i><i></i><i></i></span><span class="frame__route">/admin</span></div>
+      <div class="screen">
+        <div class="topbar">
+          <span class="brand">EventEase</span>
+          <span class="who">Admin User <span class="role">ADMIN</span> <span class="btn sm">Log out</span></span>
+        </div>
+
+        <div class="section">
+          <div class="section__head"><h2 class="title">Clubs</h2><span class="btn primary sm">+ New club</span></div>
+          <div style="overflow-x:auto;">
+            <table class="table">
+              <thead><tr><th>Club</th><th>Category</th><th>President</th><th>Events</th><th></th></tr></thead>
+              <tbody>
+                <tr><td><div class="ln w70"></div></td><td><div class="ln w55"></div></td><td><div class="ln w55"></div></td><td>3</td><td><span class="cellactions"><u>Assign president</u><u>Delete</u></span></td></tr>
+                <tr><td><div class="ln w55"></div></td><td><div class="ln w45"></div></td><td><span class="sub">Unassigned</span></td><td>0</td><td><span class="cellactions"><u>Assign president</u><u>Delete</u></span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- 4.3.7 FACULTY -->
+  <figure>
+    <figcaption><b>Fig 4.3.7</b> — <span>Faculty dashboard</span></figcaption>
+    <div class="frame">
+      <div class="frame__bar"><span class="dots"><i></i><i></i><i></i></span><span class="frame__route">/faculty</span></div>
+      <div class="screen">
+        <div class="topbar">
+          <span class="brand">EventEase</span>
+          <span class="who">Priti Shelar <span class="role">FACULTY</span> <span class="btn sm">Log out</span></span>
+        </div>
+        <div class="section">
+          <h2 class="title">Reports</h2>
+          <div class="region narrow" style="width:100%;">
+            <div class="field"><label>Class</label><div class="input sel">Select a class</div></div>
+            <div class="btnrow" style="flex-wrap:wrap;">
+              <div class="btn">⤓ Download Attendance Sheet</div>
+              <div class="btn">⤓ Download CC Points Sheet</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- 4.3.8 NEW ATTENDANCE REQUEST FORM -->
+  <figure>
+    <figcaption><b>Fig 4.3.8</b> — <span>New Attendance Request form (dialog)</span></figcaption>
+    <div class="frame">
+      <div class="frame__bar"><span class="dots"><i></i><i></i><i></i></span><span class="frame__route">dialog · new attendance request</span></div>
+      <div class="screen">
+        <div class="region narrow" style="margin:0 auto; width:100%;">
+          <h2 class="title">New attendance request</h2>
+          <div class="field"><label>Event</label><div class="input sel">Select the event you were on duty for</div></div>
+          <div class="field"><label>Subject</label><div class="input sel">Select the subject</div></div>
+          <div class="grid2">
+            <div class="field"><label>Lecture date</label><div class="input">dd / mm / yyyy</div></div>
+            <div class="field"><label>Timing</label><div class="input">09:00 – 10:00</div></div>
+          </div>
+          <div class="field"><label>Teacher</label><div class="input">Teacher's name</div></div>
+          <div class="field"><label>Reason</label><div class="input" style="height:52px; align-items:flex-start; padding-top:8px;">Why you were on duty…</div></div>
+          <div class="btn primary wide">Submit request</div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- 4.3.9 CHOOSE TEAM FORM -->
+  <figure>
+    <figcaption><b>Fig 4.3.9</b> — <span>Choose Team form (dialog)</span></figcaption>
+    <div class="frame">
+      <div class="frame__bar"><span class="dots"><i></i><i></i><i></i></span><span class="frame__route">dialog · choose your team</span></div>
+      <div class="screen">
+        <div class="region narrow" style="margin:0 auto; width:100%;">
+          <h2 class="title">Choose your team</h2>
+          <div class="sub">Pick a club, then a team within it.</div>
+          <div class="field"><label>Club</label><div class="input sel">Select a club</div></div>
+          <div class="field"><label>Team</label><div class="input sel">Choose a club first</div></div>
+          <div class="btn primary wide">Join this team</div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+</div>

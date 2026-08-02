@@ -1,0 +1,118 @@
+@startuml
+title EventEase - Use Case Diagram
+
+left to right direction
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam nodesep 15
+skinparam ranksep 20
+skinparam rectangle {
+    RoundCorner 10
+}
+
+' The two "together" blocks are what make this fit a page: they keep the
+' grouped boxes adjacent, so the diagram lays out as two column-groups
+' (Admin/President/Team Head, then Volunteer/Teacher) instead of one tall
+' sliver of five stacked boxes.
+'
+' Actor order follows the chain of authority: Admin sets up clubs, President
+' sets up teams and events, Team Head approves, Volunteer submits. Teacher is
+' last because they do not take part in the workflow — they read its output.
+'
+' Login/Logout are repeated per actor rather than shared. With five actors, a
+' single shared Login means fifteen arrows converging on one ellipse.
+
+actor Admin
+actor President
+actor "Team Head" as TeamHead
+actor Volunteer
+actor Teacher
+
+together {
+
+rectangle "Admin Use Cases" {
+  usecase "Login" as ALogin
+  usecase "Create Club" as AClub
+  usecase "Assign President" as APres
+  usecase "Manage Classes" as AClass
+  usecase "Manage Subjects" as ASub
+  usecase "Logout" as ALogout
+}
+
+rectangle "President Use Cases" {
+  usecase "Login" as PLogin
+  usecase "Create Team" as PTeam
+  usecase "Assign Team Head" as PHead
+  usecase "Create Event" as PEvent
+  usecase "Verify Request" as PVerify
+  usecase "Verify CC Credits" as PCredits
+  usecase "Logout" as PLogout
+}
+
+rectangle "Team Head Use Cases" {
+  usecase "Login" as HLogin
+  usecase "View Team Requests" as HView
+  usecase "Approve Request" as HApprove
+  usecase "Reject Request" as HReject
+  usecase "Award CC Credits" as HAward
+  usecase "Logout" as HLogout
+}
+
+}
+
+together {
+
+rectangle "Volunteer Use Cases" {
+  usecase "Login" as VLogin
+  usecase "Select Team" as VTeam
+  usecase "Submit Request" as VSubmit
+  usecase "View My Requests" as VView
+  usecase "View My Credits" as VCredits
+  usecase "Logout" as VLogout
+}
+
+rectangle "Teacher Use Cases" {
+  usecase "Login" as TLogin
+  usecase "Download Attendance" as TAtt
+  usecase "Download CC Sheet" as TCC
+  usecase "Logout" as TLogout
+}
+
+}
+
+Admin --> ALogin
+Admin --> AClub
+Admin --> APres
+Admin --> AClass
+Admin --> ASub
+Admin --> ALogout
+
+President --> PLogin
+President --> PTeam
+President --> PHead
+President --> PEvent
+President --> PVerify
+President --> PCredits
+President --> PLogout
+
+TeamHead --> HLogin
+TeamHead --> HView
+TeamHead --> HApprove
+TeamHead --> HReject
+TeamHead --> HAward
+TeamHead --> HLogout
+
+Volunteer --> VLogin
+Volunteer --> VTeam
+Volunteer --> VSubmit
+Volunteer --> VView
+Volunteer --> VCredits
+Volunteer --> VLogout
+
+Teacher --> TLogin
+Teacher --> TAtt
+Teacher --> TCC
+Teacher --> TLogout
+
+@enduml

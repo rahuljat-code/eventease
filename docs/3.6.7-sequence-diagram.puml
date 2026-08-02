@@ -1,0 +1,36 @@
+@startuml
+title 3.6.7 Sequence Diagram - Attendance Request & Approval
+
+autonumber
+skinparam shadowing false
+
+actor Volunteer
+actor "Team Head" as Head
+actor President
+actor Teacher
+
+participant "AttendanceRequest" as Request
+
+Volunteer -> Request : Submit request (event, subject, date, time, teacher, reason)
+Request -> Request : Save with status Pending Team Head
+Request --> Volunteer : Request submitted
+
+Head -> Request : View team's pending requests
+Request --> Head : Return pending requests
+Head -> Request : Approve request
+Request -> Request : Update to Pending President (with timestamp)
+Request --> Head : Approved, forwarded to President
+
+President -> Request : View head-approved requests
+Request --> President : Return requests
+President -> Request : Verify request
+Request -> Request : Update to Approved (with timestamp)
+Request --> President : Request approved
+
+Teacher -> Request : Download attendance report (class-wise)
+Request --> Teacher : Return approved attendance
+
+Volunteer -> Request : View my request status
+Request --> Volunteer : Return status (Approved)
+
+@enduml

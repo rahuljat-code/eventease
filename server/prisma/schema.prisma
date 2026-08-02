@@ -1,0 +1,257 @@
+// Prisma schema for EventEase
+// Docs: https://pris.ly/d/prisma-schema
+//
+// This file grows one MODULE at a time. Module 1 (Authentication & Role
+// Management) only has to answer "who is this person?" — so it defines the
+// academic structure (Class, Subject) and the User.
+//
+// Clubs, Teams, Events, Attendance Requests and CC Credits are Modules 2–5.
+// They arrive later, each with its own migration. Nothing is written here
+// before the module that needs it.
+
+// Tells Prisma to generate the TypeScript client we use to query the DB
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Tells Prisma WHICH database to talk to (reads the URL from .env).
+//
+// In development this is the local Prisma Postgres, which manages its own
+// shadow database. When we switch to Supabase for the final demo, this gains a
+// second line —  directUrl = env("DIRECT_URL")  — because Supabase runs normal
+// queries through a pooler but migrations must bypass it.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  VOLUNTEER
+  TEAM_HEAD
+  PRESIDENT
+  FACULTY
+  ADMIN
+}
+
+// The lifecycle of an event, set by the President as it progresses.
+enum EventStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+}
+
+// The two-level approval states of an attendance request. A request starts at
+// PENDING_TEAM_HEAD; the Team Head moves it to PENDING_PRESIDENT; the President
+// makes it APPROVED. Either level can REJECT it (and the volunteer may then
+// edit and resubmit, which sends it back to PENDING_TEAM_HEAD).
+enum RequestStatus {
+  PENDING_TEAM_HEAD
+  PENDING_PRESIDENT
+  APPROVED
+  REJECTED
+}
+
+// One row per class the college teaches, e.g. TYIT.
+//
+// The course and year live HERE, not on every student, so "B.Sc. IT / year 3"
+// is stored once instead of being repeated on three hundred user rows. It also
+// makes the class impossible to misspell: there is exactly one TYIT and every
+// student points at it.
+model Class {
+  id     Int    @id @default(autoincrement())
+  name   String @unique // "TYIT", "SYIT", "FYIT"
+  course String // "B.Sc. Information Technology"
+  year   Int // 1, 2, 3
+
+  subjects  Subject[]
+  students  User[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// A subject belongs to exactly one class — TYIT's "AI" is not SYIT's subject.
+//
+// These rows are DATA, not structure: they can be added at any time, and the
+// faculty attendance sheet builds one column per subject from whatever rows
+// exist. Adding a subject later needs no code change.
+model Subject {
+  id      Int    @id @default(autoincrement())
+  name    String // "Artificial Intelligence"
+  code    String // "AI" — the column heading on the faculty sheet
+  classId Int
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Attendance requests raised for a missed lecture of this subject.
+  requests AttendanceRequest[]
+
+  // Two subjects in the same class cannot share a code, but SYIT and TYIT may
+  // each have their own "AI".
+  @@unique([classId, code])
+}
+
+model User {
+  id   Int    @id @default(autoincrement())
+  name String
+  email String @unique
+
+  // Named passwordHash, NOT password, because the real password is never
+  // stored — only the bcrypt hash of it. Hashing is one-way, so even if the
+  // database leaked, the original passwords could not be recovered.
+  passwordHash String
+
+  // Always starts as VOLUNTEER (the lowest privilege). The role is never read
+  // from the signup request — otherwise anyone could register as an ADMIN.
+  role Role @default(VOLUNTEER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ----- Student profile -----
+  // Nullable on purpose: a Faculty or Admin account has no roll number, no UID
+  // and no class. Only students carry these.
+  //
+  // A volunteer never re-types this on an attendance request — the request
+  // reads it from here.
+  rollNo  String? // "44" — unique within a class, not across the college
+  uid     String? @unique // "24BIT044" — the college-wide student ID
+  classId Int?
+  class   Class?  @relation(fields: [classId], references: [id])
+
+  // Roll number 44 exists in TYIT and in SYIT, so a roll number alone is not
+  // unique — but (class + roll number) is.
+  @@unique([classId, rollNo])
+
+  // ----- Module 2 -----
+  // The clubs this user is President of. A user leads a club; assigning them as
+  // a club's president also sets their role to PRESIDENT (done in one
+  // transaction so the two can never disagree).
+  presidentOfClubs Club[] @relation("ClubPresident")
+
+  // ----- Module 3 -----
+  // The one team this user belongs to (a volunteer belongs to exactly one team).
+  // Nullable: Admin/Faculty and not-yet-joined volunteers have no team.
+  teamId Int?
+  team   Team? @relation("TeamMembership", fields: [teamId], references: [id], onDelete: SetNull)
+
+  // The teams this user is the head of. Assigning someone as a team's head also
+  // sets their role to TEAM_HEAD and enrols them in that team — all in one
+  // transaction, so the head is always a member of the club by construction.
+  teamsLed Team[] @relation("TeamHead")
+
+  // ----- Module 4 -----
+  // The attendance requests this volunteer has raised, plus the requests they
+  // have acted on as a Team Head or as a President. Three separate relations
+  // because the same user table plays all three parts.
+  requests         AttendanceRequest[] @relation("VolunteerRequests")
+  headActions      AttendanceRequest[] @relation("HeadActions")
+  presidentActions AttendanceRequest[] @relation("PresidentActions")
+}
+
+// A club is created by the Admin, who then assigns a President to run it.
+// A club owns many events. (Teams come in Module 3.)
+model Club {
+  id       Int     @id @default(autoincrement())
+  name     String  @unique
+  category String? // "Technical", "Cultural", ...
+
+  // Nullable: a club can exist before the Admin has assigned a President to it.
+  presidentId Int?
+  president   User? @relation("ClubPresident", fields: [presidentId], references: [id])
+
+  events    Event[]
+  teams     Team[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// A team belongs to a club and is created by that club's President (e.g. the
+// Events team, the Decoration team). A volunteer belongs to one team; the team
+// has one head. Deleting the club deletes its teams; deleting a team only
+// detaches its members (their teamId becomes null) — it never deletes a user.
+model Team {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  clubId Int
+  club   Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  // The head of this team. Nullable: a team can exist before a head is assigned.
+  headId Int?
+  head   User? @relation("TeamHead", fields: [headId], references: [id], onDelete: SetNull)
+
+  // The volunteers on this team.
+  members User[] @relation("TeamMembership")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Two teams in the same club cannot share a name (but two clubs can each have
+  // an "Events" team).
+  @@unique([clubId, name])
+}
+
+// An event belongs to exactly one club and is created/managed by that club's
+// President. Deleting the club deletes its events (onDelete: Cascade).
+model Event {
+  id        Int         @id @default(autoincrement())
+  name      String
+  eventDate DateTime
+  venue     String?
+  status    EventStatus @default(UPCOMING)
+
+  clubId    Int
+  club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Attendance requests raised for duty at this event.
+  requests AttendanceRequest[]
+}
+
+// One row per LECTURE a volunteer missed while on duty for an event.
+//
+// It carries its own approval trail: who acted at each level, when, and their
+// remark. That is why no separate Approval table is needed — the two levels are
+// fixed (Team Head, then President), so the columns live on the request itself.
+model AttendanceRequest {
+  id Int @id @default(autoincrement())
+
+  // Who is claiming, and the duty that justifies it.
+  volunteerId Int
+  volunteer   User @relation("VolunteerRequests", fields: [volunteerId], references: [id], onDelete: Cascade)
+  eventId     Int
+  event       Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  // The lecture that was missed.
+  subjectId   Int
+  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  lectureDate DateTime
+  lectureTime String // "09:00 - 10:00"
+  teacherName String
+  reason      String?
+
+  status RequestStatus @default(PENDING_TEAM_HEAD)
+
+  // ----- First level: the volunteer's own Team Head -----
+  headActionById Int?
+  headActionBy   User?     @relation("HeadActions", fields: [headActionById], references: [id], onDelete: SetNull)
+  headActionAt   DateTime?
+  headRemark     String?
+
+  // ----- Second level: the club President. The lecture only counts once this
+  // is APPROVED.
+  presidentActionById Int?
+  presidentActionBy   User?     @relation("PresidentActions", fields: [presidentActionById], references: [id], onDelete: SetNull)
+  presidentActionAt   DateTime?
+  presidentRemark     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // The same lecture cannot be claimed twice. Enforced by the database, not by
+  // hopeful application code.
+  @@unique([volunteerId, subjectId, lectureDate])
+}

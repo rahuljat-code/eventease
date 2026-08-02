@@ -1,0 +1,94 @@
+@startuml
+title EventEase - Activity Diagram (Attendance Request Approval)
+
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam activityBorderColor Black
+skinparam activityBackgroundColor White
+skinparam ArrowColor Black
+
+' This flow runs ONCE PER REQUEST, and a request is ONE missed lecture.
+' That is why CC credits do not appear here: they are per (volunteer, event),
+' awarded by the Team Head after the event. Assigning them on request approval
+' would pay out five times for five lectures missed at one event.
+'
+' Report generation and teacher downloads are not here either — a teacher
+' downloads whenever they like; it is not triggered by an approval. And nothing
+' is "generated and stored": the CSV is built on the spot from a query.
+'
+' No "Notify Volunteer" step — notifications are future scope per the synopsis.
+' The volunteer sees the status on their dashboard.
+
+start
+
+:Login;
+
+:Create Attendance Request;
+
+:Select Event;
+
+:Select Subject;
+
+:Enter Lecture Details;
+
+:Enter Reason;
+
+:Submit Request;
+
+:Validate Request;
+
+if (Duplicate Request?) then (Yes)
+
+:Display Duplicate Request;
+
+stop
+
+else (No)
+
+:Forward to Team Head;
+
+endif
+
+:Team Head Reviews Request;
+
+if (Approved by Team Head?) then (No)
+
+:Record Rejection and Remark;
+
+:Status = Rejected;
+
+stop
+
+else (Yes)
+
+:Record Approval, Time and Remark;
+
+:Status = Pending President;
+
+:Forward to President;
+
+endif
+
+:President Verifies Request;
+
+if (Approved by President?) then (No)
+
+:Record Rejection and Remark;
+
+:Status = Rejected;
+
+stop
+
+else (Yes)
+
+:Record Verification and Time;
+
+:Status = Approved;
+
+:Count Lecture on Class Attendance Sheet;
+
+stop
+
+endif
+
+@enduml

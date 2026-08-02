@@ -1,0 +1,111 @@
+@startuml
+title EventEase - Object Diagram
+
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam roundCorner 8
+
+object Class1 {
+  id = 3
+  name = "TYIT"
+  course = "B.Sc. IT"
+  year = 3
+}
+
+object Subject1 {
+  id = 14
+  name = "Artificial Intelligence"
+  code = "AI"
+}
+
+object Volunteer1 {
+  id = 101
+  name = "Rahul Jat"
+  uid = "24BIT044"
+  rollNo = "44"
+}
+
+object TeamHead1 {
+  id = 102
+  name = "Aditi Sharma"
+}
+
+object President1 {
+  id = 103
+  name = "Priya Nair"
+}
+
+object Teacher1 {
+  id = 104
+  name = "Priti Shelar"
+}
+
+object Club1 {
+  id = 1
+  name = "Dot Com Club"
+  category = "Technical"
+}
+
+object Team1 {
+  id = 1
+  name = "Events Team"
+}
+
+object Event1 {
+  id = 9
+  name = "E-Waste Drive"
+  eventDate = "16-Jul-2026"
+  venue = "College Ground"
+  status = "Ongoing"
+}
+
+object AttendanceRequest1 {
+  id = 777
+  lectureDate = "16-Jul-2026"
+  lectureTime = "09:00 - 10:00"
+  teacherName = "Priti Shelar"
+  reason = "Assigned to Event Registration"
+  status = "Approved"
+  headActionAt = "16-Jul-2026 18:20"
+  presidentActionAt = "17-Jul-2026 10:05"
+}
+
+object CCCredit1 {
+  id = 301
+  creditPoints = 5
+  verifiedAt = "17-Jul-2026 10:06"
+}
+
+'==========================
+' Relationships
+'==========================
+
+Class1 --> Subject1 : has
+Class1 --> Volunteer1 : contains
+
+President1 --> Club1 : leads
+
+Club1 --> Team1 : has
+Club1 --> Event1 : organizes
+
+TeamHead1 --> Team1 : heads
+Team1 --> Volunteer1 : member
+
+Volunteer1 --> AttendanceRequest1 : submits
+Subject1 --> AttendanceRequest1 : missed
+Event1 --> AttendanceRequest1 : for
+
+TeamHead1 --> AttendanceRequest1 : approves
+President1 --> AttendanceRequest1 : verifies
+
+Volunteer1 --> CCCredit1 : receives
+Event1 --> CCCredit1 : for
+TeamHead1 --> CCCredit1 : awards
+President1 --> CCCredit1 : verifies
+
+Teacher1 --> AttendanceRequest1 : downloads
+Teacher1 --> CCCredit1 : downloads
+
+@enduml

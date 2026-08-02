@@ -1,0 +1,77 @@
+import { useEffect, useState } from "react";
+import { api } from "../lib/api";
+import type { Team } from "../lib/types";
+import { DashboardShell } from "../components/DashboardShell";
+import { RequestReviewList } from "../components/RequestReviewList";
+
+export function TeamHeadDashboard() {
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .get("/teams/my")
+      .then((res) => setTeams(res.data.teams))
+      .catch(() => setTeams([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <DashboardShell title="Team Head">
+      <div className="mt-6">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">My Team</h2>
+
+        {loading ? (
+          <p className="text-sm text-slate-500">Loading…</p>
+        ) : teams.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+            You are not leading a team yet.
+          </p>
+        ) : (
+          <div className="space-y-6">
+            {teams.map((team) => {
+              const count = team._count?.members ?? 0;
+              return (
+                <div key={team.id} className="rounded-xl border border-slate-200 bg-white">
+                  <div className="border-b border-slate-100 p-4">
+                    <p className="font-medium text-slate-900">{team.name}</p>
+                    <p className="mt-0.5 text-sm text-slate-500">
+                      {team.club?.name} · {count} member{count === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  <div className="px-4 py-3">
+                    {count === 0 ? (
+                      <p className="text-sm text-slate-400">No members have joined yet.</p>
+                    ) : (
+                      <ul className="divide-y divide-slate-100">
+                        {team.members?.map((m) => (
+                          <li key={m.id} className="flex items-center justify-between py-2 text-sm">
+                            <span className="text-slate-700">{m.name}</span>
+                            <span className="text-slate-400">
+                              {[m.class?.name, m.rollNo && `Roll ${m.rollNo}`, m.uid]
+                                .filter(Boolean)
+                                .join(" · ")}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Module 4 — first-level approval queue for this head's own team */}
+      <RequestReviewList
+        title="Pending Attendance Requests"
+        listUrl="/attendance/team"
+        actionUrl={(id) => `/attendance/${id}/head`}
+        approveLabel="Approve"
+        emptyText="No requests waiting for your approval."
+      />
+    </DashboardShell>
+  );
+}

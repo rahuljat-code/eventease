@@ -1,0 +1,30 @@
+@startuml
+title 3.6.7 Sequence Diagram (2) - CC Credit Award & Verification
+
+autonumber
+skinparam shadowing false
+
+actor "Team Head" as Head
+actor President
+actor Faculty
+actor Volunteer
+
+participant "CreditAward" as Credit
+
+Head -> Credit : Award CC points (volunteer, event, points)
+Credit -> Credit : Save with timestamp (not yet verified)
+Credit --> Head : Points awarded
+
+President -> Credit : View awarded credits (my club)
+Credit --> President : Return awarded credits
+President -> Credit : Verify credit
+Credit -> Credit : Mark verified (with timestamp)
+Credit --> President : Credit verified
+
+Faculty -> Credit : Download CC report (class-wise)
+Credit --> Faculty : Return verified points per student
+
+Volunteer -> Credit : View my CC credits
+Credit --> Volunteer : Return verified total
+
+@enduml

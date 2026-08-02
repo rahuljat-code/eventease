@@ -1,0 +1,49 @@
+@startuml
+title EventEase - State Diagram (Attendance Request)
+
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam linetype ortho
+
+skinparam state {
+  BackgroundColor White
+  BorderColor Black
+}
+
+skinparam ArrowColor Black
+
+' These four states ARE the RequestStatus enum in the database:
+' PENDING_TEAM_HEAD, PENDING_PRESIDENT, APPROVED, REJECTED.
+'
+' Note there is no arrow back from Pending President to Pending Team Head.
+' Approval only moves forward — the President verifies or rejects outright.
+'
+' CC credits are deliberately NOT mentioned here. A request is ONE missed
+' lecture; credits are per (volunteer, event) and are awarded separately by the
+' Team Head after the event. Tying credits to request approval would pay out
+' five times for five lectures missed at one event.
+
+state "Pending Team Head" as PendingTH
+state "Pending President" as PendingPR
+state Approved
+state Rejected
+
+[*] --> PendingTH : Request Submitted
+
+PendingTH --> PendingPR : Approved by Team Head
+PendingTH --> Rejected : Rejected by Team Head
+
+PendingPR --> Approved : Verified by President
+PendingPR --> Rejected : Rejected by President
+
+Approved --> [*]
+Rejected --> [*]
+
+note right of Approved
+Attendance Updated
+Lecture counts on the
+class attendance sheet
+Teacher can download it
+end note
+
+@enduml
