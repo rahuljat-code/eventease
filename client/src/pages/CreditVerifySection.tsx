@@ -3,11 +3,7 @@ import axios from "axios";
 import { api } from "../lib/api";
 import type { CreditAward } from "../lib/types";
 
-/**
- * The President's "Verify CC Points" section: the credits their team heads have
- * awarded, awaiting verification. Verifying makes the points count towards the
- * student's total; removing sends it back to the head.
- */
+
 export function CreditVerifySection() {
   const [awards, setAwards] = useState<CreditAward[]>([]);
   const [loading, setLoading] = useState(true);

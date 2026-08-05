@@ -3,11 +3,7 @@ import axios from "axios";
 import { api } from "../lib/api";
 import type { CreditTeamContext } from "../lib/types";
 
-/**
- * The Team Head's "Award CC Points" section: pick an event, then set the CC
- * points for each volunteer on the team. Points are per (volunteer, event);
- * once the President verifies them they lock.
- */
+
 export function AwardCreditsSection() {
   const [ctx, setCtx] = useState<CreditTeamContext>({ events: [], members: [], awards: [] });
   const [eventId, setEventId] = useState("");
@@ -23,7 +19,6 @@ export function AwardCreditsSection() {
     load();
   }, []);
 
-  // the award for a given volunteer + the selected event (if any)
   const awardFor = useMemo(() => {
     const map = new Map<number, { id: number; points: number; verifiedAt: string | null }>();
     if (!eventId) return map;

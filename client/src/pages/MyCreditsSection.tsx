@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import type { MyCredit } from "../lib/types";
 
-/** The volunteer's own CC credits: their verified total and the per-event list. */
 export function MyCreditsSection() {
   const [awards, setAwards] = useState<MyCredit[]>([]);
   const [total, setTotal] = useState(0);
