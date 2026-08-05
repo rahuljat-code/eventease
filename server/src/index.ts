@@ -8,6 +8,7 @@ import clubRoutes from "./routes/clubs";
 import eventRoutes from "./routes/events";
 import teamRoutes from "./routes/teams";
 import attendanceRoutes from "./routes/attendance";
+import creditRoutes from "./routes/credits";
 
 dotenv.config();
 
@@ -36,6 +37,9 @@ app.use("/api/teams", teamRoutes);
 
 // Module 4 — Attendance Request & Multi-Level Approval
 app.use("/api/attendance", attendanceRoutes);
+
+// Module 5 — CC Credit Management
+app.use("/api/credits", creditRoutes);
 
 process.on("unhandledRejection", (reason) => {
   console.error("Unhandled promise rejection:", reason);

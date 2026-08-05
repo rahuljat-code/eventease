@@ -119,6 +119,34 @@ export interface AttendanceRequest {
   presidentActionBy?: { id: number; name: string } | null;
 }
 
+/* ----- Module 5: CC Credits ----- */
+
+// One credit record for a volunteer + event, as the review lists show it.
+export interface CreditAward {
+  id: number;
+  points: number;
+  verifiedAt: string | null;
+  event: { id: number; name: string; eventDate: string };
+  volunteer: { id: number; name: string; rollNo?: string | null; class?: { name: string } | null };
+  awardedBy?: { id: number; name: string } | null;
+  verifiedBy?: { id: number; name: string } | null;
+}
+
+// Everything the Team Head's "award CC points" screen loads in one call.
+export interface CreditTeamContext {
+  events: { id: number; name: string; eventDate: string }[];
+  members: { id: number; name: string; rollNo?: string | null; class?: { name: string } | null }[];
+  awards: { id: number; volunteerId: number; eventId: number; points: number; verifiedAt: string | null }[];
+}
+
+// A volunteer's own credit, on their dashboard.
+export interface MyCredit {
+  id: number;
+  points: number;
+  verifiedAt: string | null;
+  event: { id: number; name: string; eventDate: string };
+}
+
 export interface AttendanceOptions {
   events: { id: number; name: string; eventDate: string }[];
   subjects: { id: number; name: string; code: string }[];

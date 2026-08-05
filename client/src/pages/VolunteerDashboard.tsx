@@ -6,6 +6,7 @@ import type { BrowseClub } from "../lib/types";
 import { DashboardShell } from "../components/DashboardShell";
 import { Modal } from "../components/Modal";
 import { MyRequestsSection } from "./MyRequestsSection";
+import { MyCreditsSection } from "./MyCreditsSection";
 
 export function VolunteerDashboard() {
   const { user } = useAuth();
@@ -53,6 +54,9 @@ export function VolunteerDashboard() {
 
       {/* Module 4 — this volunteer's attendance requests */}
       <MyRequestsSection hasTeam={!!user?.team} />
+
+      {/* Module 5 — this volunteer's CC credits */}
+      <MyCreditsSection />
 
       <PickTeamModal open={picking} onClose={() => setPicking(false)} />
     </DashboardShell>

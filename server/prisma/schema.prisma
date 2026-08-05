@@ -149,6 +149,13 @@ model User {
   requests         AttendanceRequest[] @relation("VolunteerRequests")
   headActions      AttendanceRequest[] @relation("HeadActions")
   presidentActions AttendanceRequest[] @relation("PresidentActions")
+
+  // ----- Module 5 -----
+  // CC credits this volunteer has EARNED, plus the ones they have AWARDED (as a
+  // Team Head) and VERIFIED (as a President). Three relations, one User table.
+  creditsEarned   CreditAward[] @relation("CreditVolunteer")
+  creditsAwarded  CreditAward[] @relation("CreditAwardedBy")
+  creditsVerified CreditAward[] @relation("CreditVerifiedBy")
 }
 
 // A club is created by the Admin, who then assigns a President to run it.
@@ -210,6 +217,9 @@ model Event {
 
   // Attendance requests raised for duty at this event.
   requests AttendanceRequest[]
+
+  // CC credits awarded to volunteers for this event (Module 5).
+  creditAwards CreditAward[]
 }
 
 // One row per LECTURE a volunteer missed while on duty for an event.
@@ -255,4 +265,39 @@ model AttendanceRequest {
   // The same lecture cannot be claimed twice. Enforced by the database, not by
   // hopeful application code.
   @@unique([volunteerId, subjectId, lectureDate])
+}
+
+// One row per (volunteer, event): the CC (Co-Curricular) points a volunteer
+// earned for their work on an event. Awarded by the Team Head, then verified by
+// the President — points count towards a student's total only once verified.
+//
+// Credit is per EVENT, not per attendance request: a volunteer who missed five
+// lectures for one event still earns ONE credit for that event. The unique
+// constraint below is what enforces that.
+model CreditAward {
+  id Int @id @default(autoincrement())
+
+  volunteerId Int
+  volunteer   User @relation("CreditVolunteer", fields: [volunteerId], references: [id], onDelete: Cascade)
+  eventId     Int
+  event       Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  points Int
+
+  // Who awarded the points (a Team Head). Nullable + SetNull so deleting that
+  // user does not delete the credit record.
+  awardedById Int?
+  awardedBy   User? @relation("CreditAwardedBy", fields: [awardedById], references: [id], onDelete: SetNull)
+
+  // The President's verification. Until verifiedAt is set, the points do NOT
+  // count towards the student's total.
+  verifiedById Int?
+  verifiedBy   User?     @relation("CreditVerifiedBy", fields: [verifiedById], references: [id], onDelete: SetNull)
+  verifiedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // One credit record per volunteer per event — no double crediting.
+  @@unique([volunteerId, eventId])
 }

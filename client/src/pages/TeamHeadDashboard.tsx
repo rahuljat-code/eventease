@@ -3,6 +3,7 @@ import { api } from "../lib/api";
 import type { Team } from "../lib/types";
 import { DashboardShell } from "../components/DashboardShell";
 import { RequestReviewList } from "../components/RequestReviewList";
+import { AwardCreditsSection } from "./AwardCreditsSection";
 
 export function TeamHeadDashboard() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -72,6 +73,9 @@ export function TeamHeadDashboard() {
         approveLabel="Approve"
         emptyText="No requests waiting for your approval."
       />
+
+      {/* Module 5 — award CC points to this head's team */}
+      <AwardCreditsSection />
     </DashboardShell>
   );
 }

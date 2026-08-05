@@ -6,6 +6,7 @@ import { DashboardShell } from "../components/DashboardShell";
 import { Modal } from "../components/Modal";
 import { TeamsSection } from "./TeamsSection";
 import { RequestReviewList } from "../components/RequestReviewList";
+import { CreditVerifySection } from "./CreditVerifySection";
 
 const STATUSES: EventStatus[] = ["UPCOMING", "ONGOING", "COMPLETED"];
 
@@ -136,6 +137,9 @@ export function PresidentDashboard() {
           emptyText="No requests waiting for your verification."
         />
       )}
+
+      {/* Module 5 — verify the CC points the heads awarded */}
+      {!noClub && <CreditVerifySection />}
 
       <EventModal open={creating} onClose={() => setCreating(false)} onDone={load} />
       <EventModal
