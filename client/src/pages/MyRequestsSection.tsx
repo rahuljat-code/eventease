@@ -65,7 +65,7 @@ export function MyRequestsSection({ hasTeam }: { hasTeam: boolean }) {
       {loading ? (
         <p className="text-sm text-slate-500">Loading…</p>
       ) : requests.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+        <p className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
           {hasTeam
             ? "No requests yet. Raise one for a lecture you missed while on duty."
             : "Join a team first — your requests go to your team head."}
@@ -73,7 +73,7 @@ export function MyRequestsSection({ hasTeam }: { hasTeam: boolean }) {
       ) : (
         <div className="space-y-3">
           {requests.map((r) => (
-            <div key={r.id} className="rounded-xl border border-slate-200 bg-white p-4">
+            <div key={r.id} className="rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] p-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="font-medium text-slate-900">

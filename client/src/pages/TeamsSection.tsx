@@ -69,7 +69,7 @@ export function TeamsSection() {
       {loading ? (
         <p className="text-sm text-slate-500">Loading…</p>
       ) : teams.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+        <p className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
           No teams yet. Create your club's first team.
         </p>
       ) : (
@@ -78,7 +78,7 @@ export function TeamsSection() {
             const count = team._count?.members ?? 0;
             const isOpen = expanded.has(team.id);
             return (
-              <div key={team.id} className="rounded-xl border border-slate-200 bg-white">
+              <div key={team.id} className="rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03]">
                 <div className="flex items-center justify-between p-4">
                   <div>
                     <p className="font-medium text-slate-900">{team.name}</p>

@@ -54,11 +54,11 @@ export function AdminDashboard() {
         {loading ? (
           <p className="text-sm text-slate-500">Loading…</p>
         ) : clubs.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+          <p className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
             No clubs yet. Create one to get started.
           </p>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03]">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-slate-500">
                 <tr>

@@ -1,3 +1,116 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* =====================================================================
+   EventEase — global design system
+   Tokens, base polish and reusable component classes live here so the
+   whole app shares one look instead of ad-hoc utility strings.
+   ===================================================================== */
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply text-slate-800;
+    background-color: #f6f7fb;
+    /* soft brand-tinted backdrop instead of a flat grey */
+    background-image:
+      radial-gradient(1200px 600px at 100% -10%, rgb(99 102 241 / 0.10), transparent 60%),
+      radial-gradient(1000px 520px at -10% 8%, rgb(139 92 246 / 0.08), transparent 55%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: rgb(79 70 229 / 0.15);
+    color: rgb(49 46 129);
+  }
+
+  /* clearer, on-brand focus ring for interactive controls */
+  a:focus-visible,
+  button:focus-visible,
+  select:focus-visible {
+    @apply outline-none ring-2 ring-indigo-500/50 ring-offset-2 ring-offset-white;
+  }
+
+  /* slim, unobtrusive scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-slate-300;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+    background-clip: content-box;
+  }
+}
+
+@layer components {
+  /* Surface — the standard raised card used across every dashboard */
+  .card {
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03];
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition
+           active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply btn bg-indigo-600 text-white hover:bg-indigo-700;
+  }
+  .btn-ghost {
+    @apply btn border border-slate-200 bg-white text-slate-700 hover:bg-slate-50;
+  }
+  .btn-danger {
+    @apply btn border border-red-200 bg-white text-red-600 hover:bg-red-50;
+  }
+
+  /* Form controls */
+  .input {
+    @apply w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none
+           transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-slate-700;
+  }
+
+  /* Text + status helpers */
+  .section-title {
+    @apply text-lg font-semibold tracking-tight text-slate-900;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium;
+  }
+}
+
+/* Give every primary (indigo) button real depth, app-wide, in one place —
+   this reaches the inline `bg-indigo-600` buttons on the dashboards too. */
+button.bg-indigo-600,
+a.bg-indigo-600,
+.btn-primary {
+  box-shadow:
+    0 1px 2px rgb(79 70 229 / 0.25),
+    0 8px 18px -8px rgb(79 70 229 / 0.5);
+}
+button.bg-indigo-600:hover,
+a.bg-indigo-600:hover,
+.btn-primary:hover {
+  box-shadow:
+    0 1px 2px rgb(79 70 229 / 0.3),
+    0 10px 22px -8px rgb(79 70 229 / 0.6);
+}

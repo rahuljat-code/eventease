@@ -15,7 +15,7 @@ export function VolunteerDashboard() {
   return (
     <DashboardShell title="Volunteer">
       {/* ----- Profile card ----- */}
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
+      <div className="mt-6 rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] p-5">
         <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
           <Info label="Name" value={user?.name} />
           <Info label="UID" value={user?.uid} />
@@ -46,7 +46,7 @@ export function VolunteerDashboard() {
             requests go to this team's head.
           </p>
         ) : (
-          <p className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
+          <p className="rounded-2xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
             You are not on a team yet. Join one so you can submit attendance requests.
           </p>
         )}

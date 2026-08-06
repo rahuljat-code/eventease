@@ -69,7 +69,7 @@ export function PresidentDashboard() {
         {loading ? (
           <p className="text-sm text-slate-500">Loading…</p>
         ) : events.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+          <p className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
             No events yet. Create your club's first event.
           </p>
         ) : (
@@ -77,7 +77,7 @@ export function PresidentDashboard() {
             {events.map((ev) => (
               <div
                 key={ev.id}
-                className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4"
+                className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] p-4"
               >
                 <div>
                   <p className="font-medium text-slate-900">{ev.name}</p>
