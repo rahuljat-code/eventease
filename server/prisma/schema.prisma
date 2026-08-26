@@ -12,6 +12,8 @@
 // Tells Prisma to generate the TypeScript client we use to query the DB
 generator client {
   provider = "prisma-client-js"
+  // "native" for local dev + the Linux target Vercel's serverless runtime uses.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 // Tells Prisma WHICH database to talk to (reads the URL from .env).

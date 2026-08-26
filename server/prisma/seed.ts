@@ -141,46 +141,26 @@ async function main() {
     fs.readFileSync(path.join(__dirname, "roster.json"), "utf8")
   );
   const studentHash = await bcrypt.hash("student123", 10);
-  let imported = 0;
-  for (const [code, students] of Object.entries(roster)) {
-    const cls = await prisma.class.findUniqueOrThrow({ where: { name: code } });
-    for (const s of students) {
-      const email = `${s.uid.toLowerCase()}@eventease.local`;
-      const data = {
-        where: { email },
-        update: { name: s.name, rollNo: s.rollNo, uid: s.uid, classId: cls.id },
-        create: {
-          name: s.name,
-          email,
-          passwordHash: studentHash,
-          role: Role.VOLUNTEER,
-          rollNo: s.rollNo,
-          uid: s.uid,
-          classId: cls.id,
-        },
-      };
-      try {
-        await prisma.user.upsert(data);
-        imported++;
-      } catch (e: any) {
-        // A stale volunteer row is holding this (classId, rollNo) or uid — clear
-        // it and retry (staff rows have null rollNo/uid, so are never matched).
-        await prisma.user.deleteMany({
-          where: {
-            role: "VOLUNTEER",
-            email: { not: email },
-            OR: [{ classId: cls.id, rollNo: s.rollNo }, { uid: s.uid }],
-          },
-        });
-        try {
-          await prisma.user.upsert(data);
-          imported++;
-        } catch (e2: any) {
-          console.log(`  SKIP ${code} roll ${s.rollNo} ${s.uid} (${s.name}) — ${e2.code ?? e2.message}`);
-        }
-      }
-    }
-  }
+  const classByName = new Map(
+    (await prisma.class.findMany({ select: { id: true, name: true } })).map((c) => [c.name, c.id])
+  );
+  // Build the whole roster as one array and insert it in a single round-trip.
+  // (Per-row upserts are hundreds of round-trips — far too slow to a remote DB.)
+  // The volunteers were just deleted above, so a plain createMany is collision-free.
+  const studentData = Object.entries(roster).flatMap(([code, students]) => {
+    const classId = classByName.get(code);
+    if (!classId) return [];
+    return students.map((s) => ({
+      name: s.name,
+      email: `${s.uid.toLowerCase()}@eventease.local`,
+      passwordHash: studentHash,
+      role: Role.VOLUNTEER,
+      rollNo: s.rollNo,
+      uid: s.uid,
+      classId,
+    }));
+  });
+  const { count: imported } = await prisma.user.createMany({ data: studentData, skipDuplicates: true });
 
   console.log(`\nSeed complete. Imported ${imported} students.`);
   console.log("Logins (username / password):");
