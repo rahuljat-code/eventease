@@ -3,6 +3,7 @@ import axios from "axios";
 import { api } from "../lib/api";
 import type { Team, TeamMember, UserRef } from "../lib/types";
 import { Modal } from "../components/Modal";
+import { SearchSelect } from "../components/SearchSelect";
 
 /**
  * The Teams part of the President dashboard: create teams for their club and
@@ -243,29 +244,28 @@ function AssignHeadModal({
       <form onSubmit={submit} className="space-y-4">
         <p className="text-sm text-slate-500">
           The chosen user becomes this team's head and is added to the team.
+          {team?.head && (
+            <>
+              {" "}
+              Current: <span className="font-medium text-slate-700">{team.head.name}</span> — picking
+              someone new replaces them.
+            </>
+          )}
         </p>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-slate-700">User</label>
-          <select
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            required
-            className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-          >
-            <option value="" disabled>
-              Select a user
-            </option>
-            {users.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.name} ({u.email}) · {u.role}
-              </option>
-            ))}
-          </select>
+          <SearchSelect
+            options={users.map((u) => ({ id: u.id, label: u.name, sub: `${u.email.split("@")[0]} · ${u.role}` }))}
+            value={userId ? Number(userId) : ""}
+            onChange={(id) => setUserId(String(id))}
+            placeholder="Search for a student…"
+          />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"
-          className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+          disabled={!userId}
+          className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
         >
           Assign
         </button>
