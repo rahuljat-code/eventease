@@ -56,9 +56,7 @@ export default function Register() {
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm animate-rise-in">
         <div className="mb-6 flex flex-col items-center text-center">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-lg font-bold text-white shadow-lg shadow-indigo-500/40">
-            E
-          </span>
+          <img src="/jhc-logo.png" alt="Jai Hind College" className="h-20 w-auto" />
           <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">Create your account</h1>
           <p className="mt-1 text-sm text-slate-500">You'll be registered as a volunteer.</p>
         </div>

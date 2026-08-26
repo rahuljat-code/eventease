@@ -48,7 +48,7 @@ export function CreditVerifySection() {
   }
 
   return (
-    <div className="mt-12">
+    <div>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-900">Verify CC Points</h2>
         <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-0.5 text-sm">
@@ -77,7 +77,7 @@ export function CreditVerifySection() {
           {awards.map((a) => (
             <div
               key={a.id}
-              className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] p-4"
+              className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06] p-4"
             >
               <div>
                 <p className="font-medium text-slate-900">

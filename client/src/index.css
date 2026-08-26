@@ -15,6 +15,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
   }
 
   body {
@@ -22,14 +23,14 @@
     background-color: #f6f7fb;
     /* soft brand-tinted backdrop instead of a flat grey */
     background-image:
-      radial-gradient(1200px 600px at 100% -10%, rgb(99 102 241 / 0.10), transparent 60%),
-      radial-gradient(1000px 520px at -10% 8%, rgb(139 92 246 / 0.08), transparent 55%);
+      radial-gradient(1200px 600px at 100% -10%, rgb(37 99 235 / 0.10), transparent 60%),
+      radial-gradient(1000px 520px at -10% 8%, rgb(245 197 66 / 0.12), transparent 55%);
     background-attachment: fixed;
   }
 
   ::selection {
-    background: rgb(79 70 229 / 0.15);
-    color: rgb(49 46 129);
+    background: rgb(37 99 235 / 0.15);
+    color: rgb(30 58 138);
   }
 
   /* clearer, on-brand focus ring for interactive controls */
@@ -62,7 +63,7 @@
 @layer components {
   /* Surface — the standard raised card used across every dashboard */
   .card {
-    @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03];
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06];
   }
 
   /* Buttons */
@@ -104,13 +105,13 @@ button.bg-indigo-600,
 a.bg-indigo-600,
 .btn-primary {
   box-shadow:
-    0 1px 2px rgb(79 70 229 / 0.25),
-    0 8px 18px -8px rgb(79 70 229 / 0.5);
+    0 1px 2px rgb(37 99 235 / 0.25),
+    0 8px 18px -8px rgb(37 99 235 / 0.5);
 }
 button.bg-indigo-600:hover,
 a.bg-indigo-600:hover,
 .btn-primary:hover {
   box-shadow:
-    0 1px 2px rgb(79 70 229 / 0.3),
-    0 10px 22px -8px rgb(79 70 229 / 0.6);
+    0 1px 2px rgb(37 99 235 / 0.3),
+    0 10px 22px -8px rgb(37 99 235 / 0.6);
 }

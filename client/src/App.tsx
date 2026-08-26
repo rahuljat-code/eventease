@@ -3,7 +3,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { useAuth, dashboardPath } from "./context/AuthContext";
-import { FacultyDashboard } from "./pages/Dashboards";
+import { FacultyDashboard } from "./pages/FacultyDashboard";
 import { VolunteerDashboard } from "./pages/VolunteerDashboard";
 import { TeamHeadDashboard } from "./pages/TeamHeadDashboard";
 import { AdminDashboard } from "./pages/AdminDashboard";

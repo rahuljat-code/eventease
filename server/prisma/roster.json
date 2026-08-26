@@ -1,0 +1,970 @@
+{
+"SYIT": [
+{
+"rollNo": "1",
+"uid": "25BIT001",
+"name": "Ahuja Mohit Nand"
+},
+{
+"rollNo": "2",
+"uid": "25BIT002",
+"name": "Amreliwala Insiya Mohammed"
+},
+{
+"rollNo": "3",
+"uid": "25BIT003",
+"name": "Ansh Ashwin"
+},
+{
+"rollNo": "4",
+"uid": "25BIT004",
+"name": "Yanya Bajaj"
+},
+{
+"rollNo": "5",
+"uid": "25BIT005",
+"name": "Behrani Aashish Prem"
+},
+{
+"rollNo": "6",
+"uid": "25BIT006",
+"name": "Bhandari Gunn Bharatkumar"
+},
+{
+"rollNo": "7",
+"uid": "25BIT007",
+"name": "Nikhil Bhatia"
+},
+{
+"rollNo": "8",
+"uid": "25BIT008",
+"name": "Birmole Aryan Milind"
+},
+{
+"rollNo": "9",
+"uid": "25BIT009",
+"name": "Boxwala Anabiya Abdul Hamid"
+},
+{
+"rollNo": "10",
+"uid": "25BIT010",
+"name": "Shrehan Chatterjee"
+},
+{
+"rollNo": "11",
+"uid": "25BIT011",
+"name": "Neil Shibu Cheruvathoor"
+},
+{
+"rollNo": "12",
+"uid": "25BIT012",
+"name": "Dalvi Shubham Namdev"
+},
+{
+"rollNo": "13",
+"uid": "25BIT014",
+"name": "Gawande Yash Sanjeev"
+},
+{
+"rollNo": "14",
+"uid": "25BIT015",
+"name": "Gawde Pratik Prakash"
+},
+{
+"rollNo": "15",
+"uid": "25BIT017",
+"name": "Martin Minin Godad"
+},
+{
+"rollNo": "16",
+"uid": "25BIT019",
+"name": "Gupta Mayank Mahesh Sarojini"
+},
+{
+"rollNo": "17",
+"uid": "25BIT020",
+"name": "Gupta Ankit Vinod"
+},
+{
+"rollNo": "18",
+"uid": "25BIT021",
+"name": "Jaydeep Mahend Jadeja"
+},
+{
+"rollNo": "19",
+"uid": "25BIT022",
+"name": "Jain Tanish Sanjaykumar"
+},
+{
+"rollNo": "20",
+"uid": "25BIT023",
+"name": "Jain Reetkumar Dilipkumar"
+},
+{
+"rollNo": "21",
+"uid": "25BIT024",
+"name": "Joijode Soham Rupesh"
+},
+{
+"rollNo": "22",
+"uid": "25BIT025",
+"name": "Harsh Girish Joshi"
+},
+{
+"rollNo": "23",
+"uid": "25BIT026",
+"name": "Kadariya Batul Fatima Salim"
+},
+{
+"rollNo": "24",
+"uid": "25BIT027",
+"name": "Ishan Pradip Kadoo"
+},
+{
+"rollNo": "25",
+"uid": "25BIT028",
+"name": "Kalambe Sharayu Mukesh"
+},
+{
+"rollNo": "26",
+"uid": "25BIT029",
+"name": "Kanojiya Devesh Baijnath"
+},
+{
+"rollNo": "27",
+"uid": "25BIT030",
+"name": "Karu Taher Mustafa"
+},
+{
+"rollNo": "28",
+"uid": "25BIT031",
+"name": "Kazi Owais Parvez"
+},
+{
+"rollNo": "29",
+"uid": "25BIT032",
+"name": "Kewal Faraaz Imran"
+},
+{
+"rollNo": "30",
+"uid": "25BIT033",
+"name": "Khan Shifa Ayaz"
+},
+{
+"rollNo": "31",
+"uid": "25BIT034",
+"name": "Khan Mohammed Fahim Sagir Ahmed"
+},
+{
+"rollNo": "32",
+"uid": "25BIT035",
+"name": "Khizer Hafsa Altaf"
+},
+{
+"rollNo": "33",
+"uid": "25BIT036",
+"name": "Kumbhar Shreyash Sudarshan"
+},
+{
+"rollNo": "34",
+"uid": "25BIT038",
+"name": "Lasrado Nigel Melville Alwyn"
+},
+{
+"rollNo": "35",
+"uid": "25BIT039",
+"name": "Latif Aisha Sarfaraz"
+},
+{
+"rollNo": "36",
+"uid": "25BIT040",
+"name": "Manek Gautamii Jayprakash"
+},
+{
+"rollNo": "37",
+"uid": "25BIT041",
+"name": "Mansuri Gausia Akhtar Husain"
+},
+{
+"rollNo": "38",
+"uid": "25BIT042",
+"name": "Vaibhav Dilip Medhe"
+},
+{
+"rollNo": "39",
+"uid": "25BIT043",
+"name": "Mishra Aashvi Manoj"
+},
+{
+"rollNo": "40",
+"uid": "25BIT044",
+"name": "Nag Krishna Jaiprakash"
+},
+{
+"rollNo": "41",
+"uid": "25BIT045",
+"name": "Mohammed Owais Mohammed Nadeem Obaidi"
+},
+{
+"rollNo": "42",
+"uid": "25BIT046",
+"name": "Panchal Dhruvi Dharmendra"
+},
+{
+"rollNo": "43",
+"uid": "25BIT047",
+"name": "Parekh Mishti Chirag"
+},
+{
+"rollNo": "44",
+"uid": "25BIT048",
+"name": "Pasta Laaiqa Aslam"
+},
+{
+"rollNo": "45",
+"uid": "25BIT049",
+"name": "Patankar Mohammed Saif Munawar"
+},
+{
+"rollNo": "46",
+"uid": "25BIT050",
+"name": "Patel Bushra Abdul Kader"
+},
+{
+"rollNo": "47",
+"uid": "25BIT051",
+"name": "Soham Prakash Ramchandani"
+},
+{
+"rollNo": "48",
+"uid": "25BIT052",
+"name": "Rana Anushka Raipal"
+},
+{
+"rollNo": "49",
+"uid": "25BIT053",
+"name": "Rao Anushka Ramesh"
+},
+{
+"rollNo": "50",
+"uid": "25BIT054",
+"name": "Arman Daulat Ali Shah"
+},
+{
+"rollNo": "51",
+"uid": "25BIT055",
+"name": "Shaikh Zahra Shaukat"
+},
+{
+"rollNo": "52",
+"uid": "25BIT056",
+"name": "Shaikh Mahe Noor Shehzad"
+},
+{
+"rollNo": "53",
+"uid": "25BIT057",
+"name": "Shaikh Saniya Mubeen Ahmed"
+},
+{
+"rollNo": "54",
+"uid": "25BIT058",
+"name": "Shaikh Mohammed Tariz Shafeeque"
+},
+{
+"rollNo": "55",
+"uid": "25BIT059",
+"name": "Sharma Nikhil Ajay"
+},
+{
+"rollNo": "56",
+"uid": "25BIT060",
+"name": "Tushar Sharma"
+},
+{
+"rollNo": "57",
+"uid": "25BIT061",
+"name": "Singh Krishna Pinku"
+},
+{
+"rollNo": "58",
+"uid": "25BIT062",
+"name": "Syed Zakia Imam"
+}
+],
+"TYIT": [
+{
+"rollNo": "1",
+"uid": "24BIT065",
+"name": "Faizah Mohd Shoeb"
+},
+{
+"rollNo": "2",
+"uid": "24BIT001",
+"name": "Daniya Shahid Ahmad Ansari"
+},
+{
+"rollNo": "3",
+"uid": "24BIT002",
+"name": "Ansari Tanveer Salahuddin"
+},
+{
+"rollNo": "4",
+"uid": "24BIT003",
+"name": "Artani Diya Chander"
+},
+{
+"rollNo": "5",
+"uid": "24BIT004",
+"name": "Bhandari Tarak Bhupesh"
+},
+{
+"rollNo": "6",
+"uid": "24BIT005",
+"name": "Bhatkar Vedashri Vishwas"
+},
+{
+"rollNo": "7",
+"uid": "24BIT007",
+"name": "Bhole Aanchal Bitesh"
+},
+{
+"rollNo": "8",
+"uid": "24BIT008",
+"name": "Bhosle Utkarsha Sandeep"
+},
+{
+"rollNo": "9",
+"uid": "24BIT009",
+"name": "Chandiwala Abdul Latif Shakeel"
+},
+{
+"rollNo": "10",
+"uid": "24BIT010",
+"name": "Aadish Bimal Das"
+},
+{
+"rollNo": "11",
+"uid": "24BIT011",
+"name": "Dighaskar Om Kedar"
+},
+{
+"rollNo": "12",
+"uid": "24BIT012",
+"name": "Dsouza Adrian Aveline"
+},
+{
+"rollNo": "13",
+"uid": "24BIT013",
+"name": "Krish Manoj Kumar Dubey"
+},
+{
+"rollNo": "14",
+"uid": "24BIT015",
+"name": "Gazaly Falak Toufique"
+},
+{
+"rollNo": "15",
+"uid": "24BIT018",
+"name": "Gill Ravleen Kaur Narinder Singh"
+},
+{
+"rollNo": "16",
+"uid": "24BIT019",
+"name": "Goregaonkar Spandan Shailesh"
+},
+{
+"rollNo": "17",
+"uid": "24BIT020",
+"name": "Goyal Divya Manish"
+},
+{
+"rollNo": "18",
+"uid": "24BIT021",
+"name": "Jain Avadhi Kamlesh"
+},
+{
+"rollNo": "19",
+"uid": "24BIT044",
+"name": "Jat Rahul Omprakash"
+},
+{
+"rollNo": "20",
+"uid": "24BIT022",
+"name": "Jethwa Vibha Jayesh"
+},
+{
+"rollNo": "21",
+"uid": "24BIT023",
+"name": "Mahek Jigar Jhaveri"
+},
+{
+"rollNo": "22",
+"uid": "24BIT024",
+"name": "Shiyona K"
+},
+{
+"rollNo": "23",
+"uid": "24BIT025",
+"name": "Kadam Krrish Santosh"
+},
+{
+"rollNo": "24",
+"uid": "24BIT026",
+"name": "Saachi Tushar Kanchan"
+},
+{
+"rollNo": "25",
+"uid": "24BIT027",
+"name": "Rajit Kathiresan"
+},
+{
+"rollNo": "26",
+"uid": "24BIT028",
+"name": "Khan Anam Zahid Hussain"
+},
+{
+"rollNo": "27",
+"uid": "24BIT029",
+"name": "Khan Mohammed Nawaaz Jamal Ashraf"
+},
+{
+"rollNo": "28",
+"uid": "24BIT031",
+"name": "Khanvilkar Avdhut Rajesh"
+},
+{
+"rollNo": "29",
+"uid": "24BIT032",
+"name": "Khatkar Sanskar Ananda"
+},
+{
+"rollNo": "30",
+"uid": "24BIT034",
+"name": "Ladha Mevish Abdul Karim"
+},
+{
+"rollNo": "31",
+"uid": "24BIT036",
+"name": "Madia Drashti Manish"
+},
+{
+"rollNo": "32",
+"uid": "24BIT037",
+"name": "Makwana Harsh Manoj"
+},
+{
+"rollNo": "33",
+"uid": "24BIT039",
+"name": "Mali Deepak Sunil"
+},
+{
+"rollNo": "34",
+"uid": "24BIT040",
+"name": "Prince Maya Mandal"
+},
+{
+"rollNo": "35",
+"uid": "24BIT042",
+"name": "Yojit Shival Mehrotra"
+},
+{
+"rollNo": "36",
+"uid": "24BIT043",
+"name": "Manas Sanjeev Nandwani"
+},
+{
+"rollNo": "37",
+"uid": "24BIT045",
+"name": "Lakshya Sunil Pamnani"
+},
+{
+"rollNo": "38",
+"uid": "24BIT046",
+"name": "Parui Sneha Rabin"
+},
+{
+"rollNo": "39",
+"uid": "24BIT047",
+"name": "Paswan Vikram Jagdamba"
+},
+{
+"rollNo": "40",
+"uid": "24BIT049",
+"name": "Sankari Jayakumar Pillai"
+},
+{
+"rollNo": "41",
+"uid": "24BIT050",
+"name": "Prajapati Aditi Ramesh"
+},
+{
+"rollNo": "42",
+"uid": "24BIT051",
+"name": "Rathod Jay Ashok"
+},
+{
+"rollNo": "43",
+"uid": "24BIT052",
+"name": "Shaikh Amaan Mohiddin"
+},
+{
+"rollNo": "44",
+"uid": "24BIT053",
+"name": "Shaikh Mohammad Afaan Mohammad Shoaib"
+},
+{
+"rollNo": "45",
+"uid": "24BIT054",
+"name": "Mohd Aadil Mohd Shamim"
+},
+{
+"rollNo": "46",
+"uid": "24BIT055",
+"name": "Sarvar Javed Shaikh"
+},
+{
+"rollNo": "47",
+"uid": "24BIT066",
+"name": "Heer Shankar"
+},
+{
+"rollNo": "48",
+"uid": "24BIT056",
+"name": "Shetye Swara Shripad"
+},
+{
+"rollNo": "49",
+"uid": "24BIT058",
+"name": "Suvarna Adithya Ashok"
+},
+{
+"rollNo": "50",
+"uid": "24BIT016",
+"name": "Ghadiali Lubaina Taher"
+},
+{
+"rollNo": "51",
+"uid": "24BIT060",
+"name": "Tolani Harsh Jagdish"
+},
+{
+"rollNo": "52",
+"uid": "24BIT059",
+"name": "Tike Riya Ganesh"
+},
+{
+"rollNo": "53",
+"uid": "24BIT061",
+"name": "Vaz Chris Oscar"
+},
+{
+"rollNo": "54",
+"uid": "24BIT062",
+"name": "Prince Kumar Vishwakarma"
+},
+{
+"rollNo": "55",
+"uid": "24BIT063",
+"name": "Yadav Neha Narendra"
+},
+{
+"rollNo": "56",
+"uid": "24BIT064",
+"name": "Ibrahim Murtuza Zummer"
+}
+],
+"SYSD": [
+{
+"rollNo": "1",
+"uid": "25BSD001",
+"name": "Ahire Aryan Subhash"
+},
+{
+"rollNo": "2",
+"uid": "25BSD002",
+"name": "Ansari Saima Sikandar"
+},
+{
+"rollNo": "3",
+"uid": "25BSD003",
+"name": "Batliwala Fatma Bi Asif"
+},
+{
+"rollNo": "4",
+"uid": "25BSD004",
+"name": "Beri Trivik Sanjeev"
+},
+{
+"rollNo": "5",
+"uid": "25BSD005",
+"name": "Bhalerao Vansh"
+},
+{
+"rollNo": "6",
+"uid": "25BSD006",
+"name": "Bhartav Shubham Sanjay"
+},
+{
+"rollNo": "7",
+"uid": "25BSD007",
+"name": "Bhosale Atharv Vijay"
+},
+{
+"rollNo": "8",
+"uid": "25BSD009",
+"name": "Dubey Shweta Amol"
+},
+{
+"rollNo": "9",
+"uid": "25BSD012",
+"name": "Gupta Ronit Vinod"
+},
+{
+"rollNo": "10",
+"uid": "25BSD013",
+"name": "Gupta Rudra Sanjay"
+},
+{
+"rollNo": "11",
+"uid": "25BSD049",
+"name": "Jada Mohamed Umar Bashir"
+},
+{
+"rollNo": "12",
+"uid": "25BSD015",
+"name": "Jha Kalpana Shambhu"
+},
+{
+"rollNo": "13",
+"uid": "25BSD016",
+"name": "Jhamani Laksh Rajesh"
+},
+{
+"rollNo": "14",
+"uid": "25BSD017",
+"name": "Kadam Aaryan Samir"
+},
+{
+"rollNo": "15",
+"uid": "25BSD018",
+"name": "Kapadia Sumaiya Irfan"
+},
+{
+"rollNo": "16",
+"uid": "25BSD019",
+"name": "Khamgaonkar Sahil Abhay"
+},
+{
+"rollNo": "17",
+"uid": "25BSD020",
+"name": "Khan Rahmish Parvez"
+},
+{
+"rollNo": "18",
+"uid": "25BSD021",
+"name": "Khan Adiba Maqbool"
+},
+{
+"rollNo": "19",
+"uid": "25BSD022",
+"name": "Kheriwala Huzaifa Aliasgar"
+},
+{
+"rollNo": "20",
+"uid": "25BSD023",
+"name": "Kulabkar Hardik Ganesh"
+},
+{
+"rollNo": "21",
+"uid": "25BSD024",
+"name": "Mevawala Mustafa Yusuf"
+},
+{
+"rollNo": "22",
+"uid": "25BSD025",
+"name": "Mishra Shreyash Shivaji"
+},
+{
+"rollNo": "23",
+"uid": "25BSD026",
+"name": "Mogaveera Manisha Manjunatha"
+},
+{
+"rollNo": "24",
+"uid": "25BSD027",
+"name": "Parab Babu Santosh"
+},
+{
+"rollNo": "25",
+"uid": "25BSD028",
+"name": "Patel Mohammed Ayaan Javidali"
+},
+{
+"rollNo": "26",
+"uid": "25BSD029",
+"name": "Prajapati Pawan Dharmendra"
+},
+{
+"rollNo": "27",
+"uid": "25BSD030",
+"name": "Prasade Dhaani"
+},
+{
+"rollNo": "28",
+"uid": "25BSD031",
+"name": "Qureshi Juveria Shamsuddin"
+},
+{
+"rollNo": "29",
+"uid": "25BSD034",
+"name": "Shaikh Zubair Asgar Ali"
+},
+{
+"rollNo": "30",
+"uid": "25BSD035",
+"name": "Shetty Lavanya Anand"
+},
+{
+"rollNo": "31",
+"uid": "25BSD038",
+"name": "Shukla Vatsal Vishal"
+},
+{
+"rollNo": "32",
+"uid": "25BSD039",
+"name": "Siddique Adiba"
+},
+{
+"rollNo": "33",
+"uid": "25BSD042",
+"name": "Suthar Bhupendra Kiran"
+},
+{
+"rollNo": "34",
+"uid": "25BSD044",
+"name": "Tingare Sahil Kaluram"
+},
+{
+"rollNo": "35",
+"uid": "25BSD010",
+"name": "Vaghela Bhumika Ganesh"
+},
+{
+"rollNo": "36",
+"uid": "25BSD045",
+"name": "Yadav Shubham Ramanuj"
+},
+{
+"rollNo": "37",
+"uid": "25BSD046",
+"name": "Yadav Pawan Jayprakash"
+},
+{
+"rollNo": "38",
+"uid": "25BSD047",
+"name": "Yadav Priyanshu Rajesh"
+},
+{
+"rollNo": "39",
+"uid": "25BSD048",
+"name": "Zaga Aisha Salim"
+}
+],
+"TYSD": [
+{
+"rollNo": "1",
+"uid": "24BSD001",
+"name": "Ahire Harshwardhan Ashok"
+},
+{
+"rollNo": "2",
+"uid": "24BSD003",
+"name": "Ansari Arshi Mohd. Nasir"
+},
+{
+"rollNo": "3",
+"uid": "24BSD002",
+"name": "Ansari Nashra Akhlaque"
+},
+{
+"rollNo": "4",
+"uid": "24BSD004",
+"name": "Avhad Varun Yogesh"
+},
+{
+"rollNo": "5",
+"uid": "24BSD006",
+"name": "Bumbiya Mohsin Ashraf"
+},
+{
+"rollNo": "6",
+"uid": "24BSD008",
+"name": "Chauhan Shivam Omprakash"
+},
+{
+"rollNo": "7",
+"uid": "24BSD010",
+"name": "Deshpande Mayuresh Prasanna"
+},
+{
+"rollNo": "8",
+"uid": "24BSD011",
+"name": "Faiz Mohd"
+},
+{
+"rollNo": "9",
+"uid": "24BSD013",
+"name": "Gilitwala Nafisa Zuzer"
+},
+{
+"rollNo": "10",
+"uid": "24BSD015",
+"name": "Gupta Paramjeet Mantu"
+},
+{
+"rollNo": "11",
+"uid": "24BSD014",
+"name": "Gupta Harsh Dharmendra"
+},
+{
+"rollNo": "12",
+"uid": "24BSD016",
+"name": "Haffizi Alfiya Ibrahim"
+},
+{
+"rollNo": "13",
+"uid": "24BSD017",
+"name": "Jamal Shajar Afroz"
+},
+{
+"rollNo": "14",
+"uid": "24BSD018",
+"name": "Kanojia Abhay Bharat"
+},
+{
+"rollNo": "15",
+"uid": "24BSD019",
+"name": "Kataria Silky Bharat"
+},
+{
+"rollNo": "16",
+"uid": "24BSD020",
+"name": "Katwala Mahek Dimple"
+},
+{
+"rollNo": "17",
+"uid": "24BSD021",
+"name": "Kawde Tashvi Amit"
+},
+{
+"rollNo": "18",
+"uid": "24BSD022",
+"name": "Khan Saniya Shafique"
+},
+{
+"rollNo": "19",
+"uid": "24BSD023",
+"name": "Khan Sharique Shakil"
+},
+{
+"rollNo": "20",
+"uid": "24BSD025",
+"name": "Kolad Mohamad Hasan Siddik"
+},
+{
+"rollNo": "21",
+"uid": "24BSD024",
+"name": "Kolad Mohamad Husain Siddik"
+},
+{
+"rollNo": "22",
+"uid": "24BSD026",
+"name": "Kopty Huzaifa Mohammed"
+},
+{
+"rollNo": "23",
+"uid": "24BSD027",
+"name": "Kumbhargaonkar Bhalchandra Prashant"
+},
+{
+"rollNo": "24",
+"uid": "24BSD028",
+"name": "Late Sankesh Raju"
+},
+{
+"rollNo": "25",
+"uid": "24BSD029",
+"name": "Lohar Karan Mahendra"
+},
+{
+"rollNo": "26",
+"uid": "24BSD032",
+"name": "Muqri Rida Attar"
+},
+{
+"rollNo": "27",
+"uid": "24BSD033",
+"name": "Nadar Nithis"
+},
+{
+"rollNo": "28",
+"uid": "24BSD034",
+"name": "Palsamkar Siddhant"
+},
+{
+"rollNo": "29",
+"uid": "24BSD035",
+"name": "Pandey Nitesh Jay Ashish"
+},
+{
+"rollNo": "30",
+"uid": "24BSD038",
+"name": "Saad Mohd"
+},
+{
+"rollNo": "31",
+"uid": "24BSD039",
+"name": "Shah Muskaan Shailesh"
+},
+{
+"rollNo": "32",
+"uid": "24BSD040",
+"name": "Shaikh Mohammed Umer Mohd Wasim"
+},
+{
+"rollNo": "33",
+"uid": "24BSD042",
+"name": "Shaikh Farzaan Ahmed"
+},
+{
+"rollNo": "34",
+"uid": "24BSD041",
+"name": "Shaikh Iqra"
+},
+{
+"rollNo": "35",
+"uid": "24BSD043",
+"name": "Shetty Sagar Anand"
+},
+{
+"rollNo": "36",
+"uid": "24BSD044",
+"name": "Suterwala Sakina Aziz"
+},
+{
+"rollNo": "37",
+"uid": "24BSD045",
+"name": "Tandel Raj"
+},
+{
+"rollNo": "38",
+"uid": "24BSD046",
+"name": "Tinwala Hussain Murtuza"
+},
+{
+"rollNo": "39",
+"uid": "24BSD047",
+"name": "Tiwari Ganesh Sheshmani"
+}
+]
+}

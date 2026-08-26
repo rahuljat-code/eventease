@@ -50,7 +50,7 @@ export function AwardCreditsSection() {
   if (ctx.events.length === 0 && ctx.members.length === 0) return null;
 
   return (
-    <div className="mt-12">
+    <div>
       <h2 className="mb-4 text-lg font-semibold text-slate-900">Award CC Points</h2>
 
       <div className="mb-4 max-w-sm">
@@ -82,7 +82,7 @@ export function AwardCreditsSection() {
           No volunteers on your team yet.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03]">
+        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06]">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-500">
               <tr>

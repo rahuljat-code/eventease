@@ -46,7 +46,7 @@ export function MyRequestsSection({ hasTeam }: { hasTeam: boolean }) {
   }
 
   return (
-    <div className="mt-12">
+    <div>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-900">My Attendance Requests</h2>
         <button
@@ -73,7 +73,7 @@ export function MyRequestsSection({ hasTeam }: { hasTeam: boolean }) {
       ) : (
         <div className="space-y-3">
           {requests.map((r) => (
-            <div key={r.id} className="rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] p-4">
+            <div key={r.id} className="rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06] p-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="font-medium text-slate-900">

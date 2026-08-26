@@ -3,61 +3,76 @@ import axios from "axios";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import type { BrowseClub } from "../lib/types";
-import { DashboardShell } from "../components/DashboardShell";
+import { DashboardShell, type NavItem } from "../components/DashboardShell";
+import { OverviewSection } from "../components/OverviewSection";
 import { Modal } from "../components/Modal";
 import { MyRequestsSection } from "./MyRequestsSection";
 import { MyCreditsSection } from "./MyCreditsSection";
+import { VolunteerEventsSection } from "./VolunteerEventsSection";
+
+const NAV: NavItem[] = [
+  { id: "overview", label: "Overview", icon: "overview" },
+  { id: "events", label: "Events", icon: "calendar" },
+  { id: "team", label: "My Team", icon: "users" },
+  { id: "requests", label: "Requests", icon: "doc" },
+  { id: "credits", label: "CC Credits", icon: "bolt" },
+];
 
 export function VolunteerDashboard() {
   const { user } = useAuth();
   const [picking, setPicking] = useState(false);
 
   return (
-    <DashboardShell title="Volunteer">
-      {/* ----- Profile card ----- */}
-      <div className="mt-6 rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] p-5">
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
-          <Info label="Name" value={user?.name} />
-          <Info label="UID" value={user?.uid} />
-          <Info label="Roll No." value={user?.rollNo} />
-          <Info label="Class" value={user?.class?.name} />
-          <Info
-            label="Team"
-            value={user?.team ? `${user.team.club.name} → ${user.team.name}` : "Not on a team yet"}
-          />
-        </div>
-      </div>
-
-      {/* ----- Team section ----- */}
-      <div className="mt-8">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">My Team</h2>
-          <button
-            onClick={() => setPicking(true)}
-            className="rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
-          >
-            {user?.team ? "Change team" : "Join a team"}
-          </button>
-        </div>
-        {user?.team ? (
-          <p className="text-sm text-slate-600">
-            You are on <span className="font-medium text-slate-900">{user.team.name}</span> in{" "}
-            <span className="font-medium text-slate-900">{user.team.club.name}</span>. Your attendance
-            requests go to this team's head.
-          </p>
-        ) : (
-          <p className="rounded-2xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
-            You are not on a team yet. Join one so you can submit attendance requests.
-          </p>
-        )}
-      </div>
-
-      {/* Module 4 — this volunteer's attendance requests */}
-      <MyRequestsSection hasTeam={!!user?.team} />
-
-      {/* Module 5 — this volunteer's CC credits */}
-      <MyCreditsSection />
-
+    <DashboardShell
+      nav={NAV}
+      subtitle={user?.team ? `${user.team.club.name} · ${user.team.name}` : "Volunteer"}
+      sections={{
+        overview: (
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06]">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+                <Info label="Name" value={user?.name} />
+                <Info label="UID" value={user?.uid} />
+                <Info label="Roll No." value={user?.rollNo} />
+                <Info label="Class" value={user?.class?.name} />
+                <Info
+                  label="Team"
+                  value={user?.team ? `${user.team.club.name} → ${user.team.name}` : "Not on a team yet"}
+                />
+              </div>
+            </div>
+            <OverviewSection />
+          </div>
+        ),
+        events: <VolunteerEventsSection />,
+        team: (
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900">My Team</h2>
+              <button
+                onClick={() => setPicking(true)}
+                className="rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+              >
+                {user?.team ? "Change team" : "Join a team"}
+              </button>
+            </div>
+            {user?.team ? (
+              <p className="text-sm text-slate-600">
+                You are on <span className="font-medium text-slate-900">{user.team.name}</span> in{" "}
+                <span className="font-medium text-slate-900">{user.team.club.name}</span>. Your attendance
+                requests go to this team's head.
+              </p>
+            ) : (
+              <p className="rounded-2xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
+                You are not on a team yet. Join one so you can submit attendance requests.
+              </p>
+            )}
+          </div>
+        ),
+        requests: <MyRequestsSection hasTeam={!!user?.team} />,
+        credits: <MyCreditsSection />,
+      }}
+    >
       <PickTeamModal open={picking} onClose={() => setPicking(false)} />
     </DashboardShell>
   );

@@ -66,6 +66,11 @@ model Class {
 
   subjects  Subject[]
   students  User[]
+
+  // ----- Module 7.2 -----
+  // CC activities a Faculty member runs for this class (e.g. a blood-donation camp).
+  ccActivities CCActivity[]
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -156,6 +161,16 @@ model User {
   creditsEarned   CreditAward[] @relation("CreditVolunteer")
   creditsAwarded  CreditAward[] @relation("CreditAwardedBy")
   creditsVerified CreditAward[] @relation("CreditVerifiedBy")
+
+  // ----- Module 7.2 -----
+  // CC activities this user created (as Faculty), and the activity-attendance
+  // rows marking this student present/absent at an activity.
+  ccActivitiesCreated  CCActivity[]           @relation("CCActivityCreator")
+  ccActivityAttendance CCActivityAttendance[] @relation("CCActivityStudent")
+
+  // ----- Module 7.3 (Event Registration) -----
+  // The events this volunteer has registered to participate in.
+  eventRegistrations EventRegistration[]
 }
 
 // A club is created by the Admin, who then assigns a President to run it.
@@ -220,6 +235,9 @@ model Event {
 
   // CC credits awarded to volunteers for this event (Module 5).
   creditAwards CreditAward[]
+
+  // Volunteers who registered to participate in this event (Module 7.3).
+  registrations EventRegistration[]
 }
 
 // One row per LECTURE a volunteer missed while on duty for an event.
@@ -300,4 +318,69 @@ model CreditAward {
 
   // One credit record per volunteer per event — no double crediting.
   @@unique([volunteerId, eventId])
+}
+
+// Module 7.2 — a Co-Curricular activity a Faculty member runs directly, outside
+// the club/event flow (e.g. a seminar, a blood-donation camp). The teacher sets
+// a point value, then marks students of one class present. Present students earn
+// the activity's points. The teacher's marking is final — there is no second
+// approval, because the teacher is the authority here.
+model CCActivity {
+  id           Int      @id @default(autoincrement())
+  title        String // the column heading on the CC-activities sheet
+  activityDate DateTime
+  points       Int // CC points a present student earns
+
+  // The class whose students this activity is for.
+  classId Int
+  class   Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  // Who created it (a Faculty member). SetNull so deleting the account keeps the
+  // activity and its record.
+  createdById Int?
+  createdBy   User? @relation("CCActivityCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  attendance CCActivityAttendance[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// One row per (activity, student): whether that student was present at the
+// activity. Only present rows earn the activity's points.
+model CCActivityAttendance {
+  id Int @id @default(autoincrement())
+
+  activityId Int
+  activity   CCActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  studentId Int
+  student   User @relation("CCActivityStudent", fields: [studentId], references: [id], onDelete: Cascade)
+
+  present Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // One attendance record per student per activity.
+  @@unique([activityId, studentId])
+}
+
+// Module 7.3 — a volunteer registering to participate in an event. One row per
+// (event, volunteer): the presence of a row means "registered", deleting it
+// means "cancelled". Kept separate from attendance (Module 4), which is about
+// missed lectures — registration is about signing up to take part.
+model EventRegistration {
+  id Int @id @default(autoincrement())
+
+  eventId Int
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  // A volunteer can register for an event only once.
+  @@unique([eventId, userId])
 }

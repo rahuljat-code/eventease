@@ -1,9 +1,11 @@
 import { PrismaClient, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import fs from "fs";
+import path from "path";
 
 const prisma = new PrismaClient();
 
-const CLASSES = [
+const CLASSES: { name: string; course: string; year: number; subjects: string[][] }[] = [
   {
     name: "FYIT",
     course: "B.Sc. Information Technology",
@@ -19,9 +21,12 @@ const CLASSES = [
     course: "B.Sc. Information Technology",
     year: 2,
     subjects: [
+      ["Core Java", "CJ"],
       ["Data Structures", "DS"],
-      ["Database Management Systems", "DBMS"],
-      ["Operating Systems", "OS"],
+      ["Quantitative Techniques", "QT"],
+      ["Computer Networks", "CN"],
+      ["Human Resource Management", "HRM"],
+      ["Hindi", "HIN"],
     ],
   },
   {
@@ -29,9 +34,41 @@ const CLASSES = [
     course: "B.Sc. Information Technology",
     year: 3,
     subjects: [
+      ["Advance Software Development Technique", "ASDT"],
+      ["Mobile App Development With Flutter", "MAD"],
       ["Artificial Intelligence", "AI"],
-      ["Software Project Management", "SPM"],
-      ["Internet of Things", "IoT"],
+      ["Ethical Hacking", "EH"],
+      ["Big Data", "BD"],
+      ["Data Visualization", "DV"],
+    ],
+  },
+  // Software Development branch. Subjects are not in the roll-call sheets, so
+  // they start empty and can be added later (the attendance sheet builds its
+  // columns from whatever subjects exist).
+  {
+    name: "SYSD",
+    course: "B.Sc. Software Development",
+    year: 2,
+    subjects: [
+      ["Advance Java", "AJ"],
+      ["Python", "PY"],
+      ["Data CN", "DCN"],
+      ["Software Engineering", "SE"],
+      ["Human Resource Management", "HRM"],
+      ["Hindi", "HIN"],
+    ],
+  },
+  {
+    name: "TYSD",
+    course: "B.Sc. Software Development",
+    year: 3,
+    subjects: [
+      ["Data Structures and Algorithms", "DSA"],
+      ["Mobile App Development With Flutter", "MAD"],
+      ["Artificial Intelligence", "AI"],
+      ["Ethical Hacking", "EH"],
+      ["Big Data", "BD"],
+      ["Data Visualization", "DV"],
     ],
   },
 ];
@@ -50,59 +87,105 @@ async function main() {
         create: { classId: cls.id, name, code },
       });
     }
+    // Keep the class's subjects in sync — drop any no longer in the list.
+    const codes = c.subjects.map(([, code]) => code);
+    if (codes.length > 0) {
+      await prisma.subject.deleteMany({ where: { classId: cls.id, code: { notIn: codes } } });
+    } else {
+      await prisma.subject.deleteMany({ where: { classId: cls.id } });
+    }
   }
 
-  const tyit = await prisma.class.findUniqueOrThrow({ where: { name: "TYIT" } });
-  const syit = await prisma.class.findUniqueOrThrow({ where: { name: "SYIT" } });
+  // ----- Clean slate: wipe all operational / demo data -----
+  // The seed resets the system to the baseline the Admin builds on: only the
+  // Admin, one teacher, the classes/subjects and the real student roster. Clubs,
+  // teams, events, CC activities and registrations are all cleared (the Admin
+  // creates clubs and assigns presidents from inside the app; presidents then
+  // create teams and assign heads).
+  await prisma.eventRegistration.deleteMany({});
+  await prisma.attendanceRequest.deleteMany({});
+  await prisma.creditAward.deleteMany({});
+  await prisma.cCActivityAttendance.deleteMany({});
+  await prisma.cCActivity.deleteMany({});
+  await prisma.event.deleteMany({});
+  await prisma.team.deleteMany({});
+  await prisma.club.deleteMany({});
 
-  const users = [
-    { name: "Admin User", email: "admin@eventease.local", password: "admin123", role: Role.ADMIN },
-    { name: "Priya Nair", email: "president@eventease.local", password: "president123", role: Role.PRESIDENT },
-    { name: "Aditi Sharma", email: "head@eventease.local", password: "head123", role: Role.TEAM_HEAD },
-    { name: "Priti Shelar", email: "faculty@eventease.local", password: "faculty123", role: Role.FACULTY },
-    { name: "Rahul Jat", email: "rahul@eventease.local", password: "rahul123", role: Role.VOLUNTEER, rollNo: "44", uid: "24BIT044", classId: tyit.id },
-    { name: "Sana Khan", email: "sana@eventease.local", password: "sana123", role: Role.VOLUNTEER, rollNo: "12", uid: "24BIT012", classId: syit.id },
+  // ----- Staff: only the Admin and one teacher to start with -----
+  const staff = [
+    { name: "Admin", email: "admin@eventease.local", password: "W3L", role: Role.ADMIN },
+    { name: "Preeti Shelar", email: "preeti@eventease.local", password: "preeti123", role: Role.FACULTY },
   ];
-
-  for (const u of users) {
+  // Remove every other account (old demo staff + all students) — students are
+  // re-imported clean below, so nobody is left promoted.
+  await prisma.user.deleteMany({ where: { email: { notIn: staff.map((s) => s.email) } } });
+  for (const u of staff) {
+    const passwordHash = await bcrypt.hash(u.password, 10);
     await prisma.user.upsert({
       where: { email: u.email },
-      update: {},
-      create: {
-        name: u.name,
-        email: u.email,
-        passwordHash: await bcrypt.hash(u.password, 10),
-        role: u.role,
-        rollNo: u.rollNo ?? null,
-        uid: u.uid ?? null,
-        classId: u.classId ?? null,
-      },
+      update: { name: u.name, role: u.role, passwordHash },
+      create: { name: u.name, email: u.email, passwordHash, role: u.role },
     });
   }
 
-  // ----- Module 2: a demo club led by the seeded president -----
-  // So the President account can create events straight away, without an Admin
-  // having to assign a club first.
-  const president = await prisma.user.findUniqueOrThrow({
-    where: { email: "president@eventease.local" },
-  });
-  const club = await prisma.club.upsert({
-    where: { name: "Dot Com Club" },
-    update: { presidentId: president.id },
-    create: { name: "Dot Com Club", category: "Technical", presidentId: president.id },
-  });
+  // ----- Real college roster, imported from the roll-call sheets -----
+  // roster.json is { "SYIT": [{rollNo, uid, name}, ...], "TYIT": [...], ... }.
+  // Each student gets a login: email = <uid>@eventease.local, password "student123".
+  //
+  // Clear volunteer accounts first so the roster imports cleanly on every run
+  // (no leftover (classId, rollNo) collisions from earlier data). Staff accounts
+  // are untouched.
+  await prisma.user.deleteMany({ where: { role: "VOLUNTEER" } });
 
-  // ----- Module 3: a demo team under that club (no head yet) -----
-  await prisma.team.upsert({
-    where: { clubId_name: { clubId: club.id, name: "Events Team" } },
-    update: {},
-    create: { name: "Events Team", clubId: club.id },
-  });
-
-  console.log("\nSeed complete. Login accounts (email / password):");
-  for (const u of users) {
-    console.log(`  ${u.role.padEnd(10)}  ${u.email}  /  ${u.password}`);
+  const roster: Record<string, { rollNo: string; uid: string; name: string }[]> = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "roster.json"), "utf8")
+  );
+  const studentHash = await bcrypt.hash("student123", 10);
+  let imported = 0;
+  for (const [code, students] of Object.entries(roster)) {
+    const cls = await prisma.class.findUniqueOrThrow({ where: { name: code } });
+    for (const s of students) {
+      const email = `${s.uid.toLowerCase()}@eventease.local`;
+      const data = {
+        where: { email },
+        update: { name: s.name, rollNo: s.rollNo, uid: s.uid, classId: cls.id },
+        create: {
+          name: s.name,
+          email,
+          passwordHash: studentHash,
+          role: Role.VOLUNTEER,
+          rollNo: s.rollNo,
+          uid: s.uid,
+          classId: cls.id,
+        },
+      };
+      try {
+        await prisma.user.upsert(data);
+        imported++;
+      } catch (e: any) {
+        // A stale volunteer row is holding this (classId, rollNo) or uid — clear
+        // it and retry (staff rows have null rollNo/uid, so are never matched).
+        await prisma.user.deleteMany({
+          where: {
+            role: "VOLUNTEER",
+            email: { not: email },
+            OR: [{ classId: cls.id, rollNo: s.rollNo }, { uid: s.uid }],
+          },
+        });
+        try {
+          await prisma.user.upsert(data);
+          imported++;
+        } catch (e2: any) {
+          console.log(`  SKIP ${code} roll ${s.rollNo} ${s.uid} (${s.name}) — ${e2.code ?? e2.message}`);
+        }
+      }
+    }
   }
+
+  console.log(`\nSeed complete. Imported ${imported} students.`);
+  console.log("Logins (username / password):");
+  for (const u of staff) console.log(`  ${u.role.padEnd(8)}  ${u.email.split("@")[0]}  /  ${u.password}`);
+  console.log("  Student   <uid>  /  student123   (e.g. 24bit044)");
   console.log("");
 }
 

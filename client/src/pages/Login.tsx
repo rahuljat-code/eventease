@@ -7,7 +7,7 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -17,6 +17,11 @@ export default function Login() {
     setError("");
     setBusy(true);
     try {
+      // Everyone signs in with a short username — a student's UID (e.g. 24bit044)
+      // or a staff role name (admin, president, faculty…). A full email is still
+      // accepted for anyone who self-registered with their own address.
+      const id = username.trim();
+      const email = id.includes("@") ? id : `${id.toLowerCase()}@eventease.local`;
       const user = await login(email, password);
       navigate(dashboardPath(user.role), { replace: true });
     } catch (err) {
@@ -34,16 +39,14 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm animate-rise-in">
         <div className="mb-6 flex flex-col items-center text-center">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-lg font-bold text-white shadow-lg shadow-indigo-500/40">
-            E
-          </span>
+          <img src="/jhc-logo.png" alt="Jai Hind College" className="h-20 w-auto" />
           <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">Welcome back</h1>
-          <p className="mt-1 text-sm text-slate-500">Sign in to your EventEase account.</p>
+          <p className="mt-1 text-sm text-slate-500">Sign in with your username (your UID).</p>
         </div>
 
         <div className="card p-7 shadow-card">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Field label="Email" type="email" value={email} onChange={setEmail} />
+            <Field label="Username" type="text" value={username} onChange={setUsername} placeholder="e.g. 24bit044" />
             <Field label="Password" type="password" value={password} onChange={setPassword} />
 
             {error && (
@@ -72,11 +75,13 @@ function Field({
   type,
   value,
   onChange,
+  placeholder,
 }: {
   label: string;
   type: string;
   value: string;
   onChange: (v: string) => void;
+  placeholder?: string;
 }) {
   return (
     <div>
@@ -86,6 +91,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required
+        placeholder={placeholder}
         className="input"
       />
     </div>

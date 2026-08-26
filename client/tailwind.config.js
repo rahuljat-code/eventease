@@ -1,8 +1,16 @@
+import colors from "tailwindcss/colors";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      colors: {
+        // Primary accent = Jai Hind College royal blue (remaps every existing
+        // `indigo-*` utility across the app in one place). Gold is the amber
+        // scale, used as the brand highlight.
+        indigo: colors.blue,
+      },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
       },
