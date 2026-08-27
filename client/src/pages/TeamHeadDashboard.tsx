@@ -5,12 +5,14 @@ import { DashboardShell, type NavItem } from "../components/DashboardShell";
 import { OverviewSection } from "../components/OverviewSection";
 import { RequestReviewList } from "../components/RequestReviewList";
 import { AwardCreditsSection } from "./AwardCreditsSection";
+import { DutyAssignSection } from "./DutyAssignSection";
 
 const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: "overview" },
   { id: "team", label: "My Team", icon: "users" },
   { id: "requests", label: "Requests", icon: "doc" },
   { id: "award", label: "Award CC", icon: "medal" },
+  { id: "duties", label: "Duties", icon: "clipboard" },
 ];
 
 export function TeamHeadDashboard() {
@@ -89,6 +91,7 @@ export function TeamHeadDashboard() {
           />
         ),
         award: <AwardCreditsSection />,
+        duties: <DutyAssignSection />,
       }}
     />
   );

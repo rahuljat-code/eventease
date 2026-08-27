@@ -173,6 +173,11 @@ model User {
   // ----- Module 7.3 (Event Registration) -----
   // The events this volunteer has registered to participate in.
   eventRegistrations EventRegistration[]
+
+  // ----- Module 8 (Duty & Task Assignment) -----
+  // Duties assigned TO this volunteer, and duties this user created (as a Head).
+  dutiesAssigned Duty[] @relation("DutyAssignee")
+  dutiesCreated  Duty[] @relation("DutyAssigner")
 }
 
 // A club is created by the Admin, who then assigns a President to run it.
@@ -240,6 +245,9 @@ model Event {
 
   // Volunteers who registered to participate in this event (Module 7.3).
   registrations EventRegistration[]
+
+  // Duties assigned to volunteers for this event (Module 8).
+  duties Duty[]
 }
 
 // One row per LECTURE a volunteer missed while on duty for an event.
@@ -385,4 +393,34 @@ model EventRegistration {
 
   // A volunteer can register for an event only once.
   @@unique([eventId, userId])
+}
+
+// Module 8 — a duty/task a Team Head assigns to a volunteer for an event
+// (e.g. "registration desk", "stage setup"). The volunteer marks it done.
+enum DutyStatus {
+  PENDING
+  DONE
+}
+
+model Duty {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String?
+
+  // The event this duty is for (optional). SetNull keeps the duty if the event goes.
+  eventId Int?
+  event   Event? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  // Who must do it (a volunteer on the head's team).
+  assignedToId Int
+  assignedTo   User @relation("DutyAssignee", fields: [assignedToId], references: [id], onDelete: Cascade)
+
+  // Who assigned it (a Team Head). SetNull keeps the duty if that account goes.
+  assignedById Int?
+  assignedBy   User? @relation("DutyAssigner", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  status DutyStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -244,3 +244,58 @@ export interface EventRegistrant {
   class?: { name: string } | null;
   registeredAt: string;
 }
+
+/* ----- Module 8.1: Participation Certificate ----- */
+
+export interface CertificateData {
+  student: {
+    name: string;
+    uid?: string | null;
+    rollNo?: string | null;
+    class?: string | null;
+    course?: string | null;
+  };
+  clubCredits: { name: string; points: number; date: string }[];
+  activities: { name: string; points: number; date: string }[];
+  events: { name: string; date: string }[];
+  totalCC: number;
+  certificateId: string;
+  issuedAt: string;
+}
+
+/* ----- Module 8.2: Duty & Task Assignment ----- */
+
+export type DutyStatus = "PENDING" | "DONE";
+
+export interface Duty {
+  id: number;
+  title: string;
+  description?: string | null;
+  status: DutyStatus;
+  createdAt: string;
+  event?: { id: number; name: string; eventDate: string } | null;
+  assignedTo: {
+    id: number;
+    name: string;
+    rollNo?: string | null;
+    class?: { name: string } | null;
+  };
+}
+
+/* ----- Module 8.3: Leaderboard & Badges ----- */
+
+export type Badge = "Gold" | "Silver" | "Bronze" | null;
+
+export interface LeaderboardRow {
+  rank: number;
+  id: number;
+  name: string;
+  class: string | null;
+  points: number;
+  badge: Badge;
+}
+
+export interface LeaderboardData {
+  leaderboard: LeaderboardRow[];
+  me: LeaderboardRow | null;
+}

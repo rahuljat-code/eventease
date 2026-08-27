@@ -12,6 +12,9 @@ import creditRoutes from "./routes/credits";
 import reportRoutes from "./routes/reports";
 import analyticsRoutes from "./routes/analytics";
 import ccActivityRoutes from "./routes/ccActivities";
+import certificateRoutes from "./routes/certificate";
+import dutyRoutes from "./routes/duties";
+import leaderboardRoutes from "./routes/leaderboard";
 
 // Loads server/.env locally; on Vercel the env vars come from project settings,
 // so with no .env file this is simply a no-op.
@@ -53,6 +56,15 @@ app.use("/api/analytics", analyticsRoutes);
 
 // Module 7.2 — Faculty CC Activities (teacher-driven CC + class marking)
 app.use("/api/cc-activities", ccActivityRoutes);
+
+// Module 8.1 — Participation Certificate
+app.use("/api/certificate", certificateRoutes);
+
+// Module 8.2 — Duty & Task Assignment
+app.use("/api/duties", dutyRoutes);
+
+// Module 8.3 — Leaderboard & Badges
+app.use("/api/leaderboard", leaderboardRoutes);
 
 process.on("unhandledRejection", (reason) => {
   console.error("Unhandled promise rejection:", reason);

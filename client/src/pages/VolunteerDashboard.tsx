@@ -9,6 +9,9 @@ import { Modal } from "../components/Modal";
 import { MyRequestsSection } from "./MyRequestsSection";
 import { MyCreditsSection } from "./MyCreditsSection";
 import { VolunteerEventsSection } from "./VolunteerEventsSection";
+import { MyDutiesSection } from "./MyDutiesSection";
+import { LeaderboardSection } from "./LeaderboardSection";
+import { CertificateSection } from "./CertificateSection";
 
 const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: "overview" },
@@ -16,6 +19,9 @@ const NAV: NavItem[] = [
   { id: "team", label: "My Team", icon: "users" },
   { id: "requests", label: "Requests", icon: "doc" },
   { id: "credits", label: "CC Credits", icon: "bolt" },
+  { id: "duties", label: "My Duties", icon: "clipboard" },
+  { id: "leaderboard", label: "Leaderboard", icon: "medal" },
+  { id: "certificate", label: "Certificate", icon: "download" },
 ];
 
 export function VolunteerDashboard() {
@@ -71,6 +77,9 @@ export function VolunteerDashboard() {
         ),
         requests: <MyRequestsSection hasTeam={!!user?.team} />,
         credits: <MyCreditsSection />,
+        duties: <MyDutiesSection />,
+        leaderboard: <LeaderboardSection />,
+        certificate: <CertificateSection />,
       }}
     >
       <PickTeamModal open={picking} onClose={() => setPicking(false)} />
