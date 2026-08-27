@@ -41,6 +41,15 @@ export interface UserRef {
   name: string;
   email: string;
   role: Role;
+  department?: string | null;
+  phone?: string | null;
+}
+
+// The result of a bulk student CSV import.
+export interface StudentImportResult {
+  created: number;
+  skipped: number;
+  total: number;
 }
 
 export interface Club {

@@ -132,6 +132,12 @@ model User {
   // unique — but (class + roll number) is.
   @@unique([classId, rollNo])
 
+  // ----- Staff profile -----
+  // Optional contact details captured when an Admin adds a teacher (Faculty).
+  // Nullable because students and the seeded Admin do not carry them.
+  department String? // "Dept. of IT" / "Assistant Professor"
+  phone      String?
+
   // ----- Module 2 -----
   // The clubs this user is President of. A user leads a club; assigning them as
   // a club's president also sets their role to PRESIDENT (done in one

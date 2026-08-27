@@ -129,7 +129,7 @@ export function DashboardShell({
   const [active, setActive] = useState(nav[0]?.id ?? "");
 
   const roleLabel = user ? ROLE_LABEL[user.role] ?? user.role : "";
-  const firstName = user?.name?.split(/\s+/)[0] ?? "";
+  const fullName = user?.name ?? "";
   const activeLabel = nav.find((n) => n.id === active)?.label;
 
   return (
@@ -220,7 +220,7 @@ export function DashboardShell({
         <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 lg:py-10">
           <header className="mb-6">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
-              {greeting()}, {firstName}
+              {greeting()}, {fullName}
             </h1>
             <p className="mt-1 text-sm text-slate-500">
               {activeLabel ? `${activeLabel} · ${subtitle ?? roleLabel}` : subtitle ?? roleLabel}

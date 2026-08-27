@@ -6,11 +6,13 @@ import { DashboardShell, type NavItem } from "../components/DashboardShell";
 import { OverviewSection } from "../components/OverviewSection";
 import { Modal } from "../components/Modal";
 import { SearchSelect } from "../components/SearchSelect";
+import { StudentImportSection } from "./StudentImportSection";
 
 const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: "overview" },
   { id: "clubs", label: "Clubs", icon: "building" },
   { id: "teachers", label: "Teachers", icon: "users" },
+  { id: "students", label: "Students", icon: "clipboard" },
 ];
 
 export function AdminDashboard() {
@@ -146,6 +148,8 @@ export function AdminDashboard() {
               <tr>
                 <th className="px-4 py-2.5 font-medium">Name</th>
                 <th className="px-4 py-2.5 font-medium">Username</th>
+                <th className="px-4 py-2.5 font-medium">Department</th>
+                <th className="px-4 py-2.5 font-medium">Phone</th>
                 <th className="px-4 py-2.5" />
               </tr>
             </thead>
@@ -154,6 +158,8 @@ export function AdminDashboard() {
                 <tr key={t.id}>
                   <td className="px-4 py-3 font-medium text-slate-900">{t.name}</td>
                   <td className="px-4 py-3 text-slate-600">{t.email.split("@")[0]}</td>
+                  <td className="px-4 py-3 text-slate-600">{t.department || "—"}</td>
+                  <td className="px-4 py-3 text-slate-600">{t.phone || "—"}</td>
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => deleteTeacher(t)}
@@ -178,6 +184,7 @@ export function AdminDashboard() {
         overview: <OverviewSection />,
         clubs: clubsView,
         teachers: teachersView,
+        students: <StudentImportSection />,
       }}
     >
       <CreateClubModal open={creating} onClose={() => setCreating(false)} onDone={load} />
@@ -204,6 +211,8 @@ function AddTeacherModal({
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [department, setDepartment] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -211,6 +220,8 @@ function AddTeacherModal({
       setName("");
       setUsername("");
       setPassword("");
+      setDepartment("");
+      setPhone("");
       setError("");
     }
   }, [open]);
@@ -219,7 +230,13 @@ function AddTeacherModal({
     e.preventDefault();
     setError("");
     try {
-      await api.post("/users", { name, username, password });
+      await api.post("/users", {
+        name,
+        username,
+        password,
+        department: department || undefined,
+        phone: phone || undefined,
+      });
       onDone();
       onClose();
     } catch (err) {
@@ -241,6 +258,12 @@ function AddTeacherModal({
         </Labelled>
         <Labelled label="Password">
           <input value={password} onChange={(e) => setPassword(e.target.value)} required className={inputCls} />
+        </Labelled>
+        <Labelled label="Department / Designation (optional)">
+          <input value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Dept. of IT · Assistant Professor" className={inputCls} />
+        </Labelled>
+        <Labelled label="Phone number (optional)">
+          <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="98XXXXXXXX" className={inputCls} />
         </Labelled>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button type="submit" className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700">
