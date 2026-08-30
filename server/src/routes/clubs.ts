@@ -118,4 +118,28 @@ router.patch("/:id/president", requireAuth, requireRole("ADMIN"), async (req, re
   return res.json({ club });
 });
 
+// Remove a club's president. The user is demoted back to VOLUNTEER only if they
+// no longer preside over any other club (mirrors the assign transaction).
+router.delete("/:id/president", requireAuth, requireRole("ADMIN"), async (req, res) => {
+  const id = idParam(req.params.id);
+  if (id === null) return res.status(400).json({ message: "Invalid club id" });
+
+  const existing = await prisma.club.findUnique({ where: { id }, select: { presidentId: true } });
+  if (!existing) return res.status(404).json({ message: "Club not found" });
+  if (existing.presidentId === null) {
+    return res.status(400).json({ message: "This club has no president to remove" });
+  }
+  const presidentId = existing.presidentId;
+  const otherClubs = await prisma.club.count({ where: { presidentId, id: { not: id } } });
+
+  const club = await prisma.$transaction(async (tx) => {
+    if (otherClubs === 0) {
+      await tx.user.update({ where: { id: presidentId }, data: { role: Role.VOLUNTEER } });
+    }
+    return tx.club.update({ where: { id }, data: { presidentId: null }, select: clubShape });
+  });
+
+  return res.json({ club });
+});
+
 export default router;

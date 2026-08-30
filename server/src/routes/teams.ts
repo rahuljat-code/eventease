@@ -133,6 +133,36 @@ router.patch("/:id/head", requireAuth, requireRole("PRESIDENT"), async (req: Aut
   return res.json({ team: updatedTeam });
 });
 
+// Remove a team's head. The user stays a member of the team but is demoted back
+// to VOLUNTEER if they no longer head any other team. President owns the club.
+router.delete("/:id/head", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
+  const id = idParam(req.params.id);
+  if (id === null) return res.status(400).json({ message: "Invalid team id" });
+
+  const team = await prisma.team.findUnique({
+    where: { id },
+    include: { club: { select: { presidentId: true } } },
+  });
+  if (!team) return res.status(404).json({ message: "Team not found" });
+  if (team.club.presidentId !== req.user!.userId) {
+    return res.status(403).json({ message: "You can only manage your own club's teams" });
+  }
+  if (team.headId === null) {
+    return res.status(400).json({ message: "This team has no head to remove" });
+  }
+  const headId = team.headId;
+  const otherTeams = await prisma.team.count({ where: { headId, id: { not: id } } });
+
+  const updatedTeam = await prisma.$transaction(async (tx) => {
+    if (otherTeams === 0) {
+      await tx.user.update({ where: { id: headId }, data: { role: Role.VOLUNTEER } });
+    }
+    return tx.team.update({ where: { id }, data: { headId: null }, select: teamShape });
+  });
+
+  return res.json({ team: updatedTeam });
+});
+
 router.delete("/:id", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
   const id = idParam(req.params.id);
   if (id === null) return res.status(400).json({ message: "Invalid team id" });

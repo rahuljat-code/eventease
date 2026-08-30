@@ -360,6 +360,19 @@ function AssignPresidentModal({
     }
   }
 
+  async function remove() {
+    if (!club) return;
+    setError("");
+    try {
+      await api.delete(`/clubs/${club.id}/president`);
+      setUserId("");
+      onDone();
+      onClose();
+    } catch (err) {
+      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+    }
+  }
+
   return (
     <Modal open={club !== null} onClose={onClose} title={`Assign president — ${club?.name ?? ""}`}>
       <form onSubmit={submit} className="space-y-4">
@@ -389,6 +402,15 @@ function AssignPresidentModal({
         >
           Assign
         </button>
+        {club?.president && (
+          <button
+            type="button"
+            onClick={remove}
+            className="w-full rounded-lg border border-red-200 bg-white py-2.5 text-sm font-medium text-red-600 hover:bg-red-50"
+          >
+            Remove {club.president.name} as president
+          </button>
+        )}
       </form>
     </Modal>
   );

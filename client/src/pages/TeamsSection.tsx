@@ -239,6 +239,19 @@ function AssignHeadModal({
     }
   }
 
+  async function remove() {
+    if (!team) return;
+    setError("");
+    try {
+      await api.delete(`/teams/${team.id}/head`);
+      setUserId("");
+      onDone();
+      onClose();
+    } catch (err) {
+      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+    }
+  }
+
   return (
     <Modal open={team !== null} onClose={onClose} title={`Assign head — ${team?.name ?? ""}`}>
       <form onSubmit={submit} className="space-y-4">
@@ -269,6 +282,15 @@ function AssignHeadModal({
         >
           Assign
         </button>
+        {team?.head && (
+          <button
+            type="button"
+            onClick={remove}
+            className="w-full rounded-lg border border-red-200 bg-white py-2.5 text-sm font-medium text-red-600 hover:bg-red-50"
+          >
+            Remove {team.head.name} as head
+          </button>
+        )}
       </form>
     </Modal>
   );

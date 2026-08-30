@@ -92,6 +92,13 @@ export function StudentImportSection() {
   const [result, setResult] = useState<StudentImportResult | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [showNewClass, setShowNewClass] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newCourse, setNewCourse] = useState("");
+  const [newYear, setNewYear] = useState("");
+  const [classBusy, setClassBusy] = useState(false);
+  const [classError, setClassError] = useState("");
+
   useEffect(() => {
     api
       .get("/classes")
@@ -115,6 +122,30 @@ export function StudentImportSection() {
     };
     reader.onerror = () => setError("Could not read that file.");
     reader.readAsText(file);
+  }
+
+  async function createClass() {
+    if (!newName.trim()) return;
+    setClassBusy(true);
+    setClassError("");
+    try {
+      const res = await api.post("/classes", {
+        name: newName.trim(),
+        course: newCourse.trim() || undefined,
+        year: newYear ? Number(newYear) : undefined,
+      });
+      const created: ClassRef = res.data.class;
+      setClasses((cs) => [...cs, created]);
+      setClassId(String(created.id));
+      setShowNewClass(false);
+      setNewName("");
+      setNewCourse("");
+      setNewYear("");
+    } catch (err) {
+      setClassError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+    } finally {
+      setClassBusy(false);
+    }
   }
 
   async function upload() {
@@ -148,7 +179,16 @@ export function StudentImportSection() {
 
       <div className="card space-y-4 p-5">
         <div>
-          <label className="label">Class</label>
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-sm font-medium text-slate-700">Class</span>
+            <button
+              type="button"
+              onClick={() => setShowNewClass((v) => !v)}
+              className="text-sm font-medium text-indigo-600 hover:underline"
+            >
+              {showNewClass ? "Cancel" : "+ New class"}
+            </button>
+          </div>
           <select value={classId} onChange={(e) => setClassId(e.target.value)} className="input">
             <option value="" disabled>
               Select the class this sheet is for
@@ -159,6 +199,46 @@ export function StudentImportSection() {
               </option>
             ))}
           </select>
+
+          {showNewClass && (
+            <div className="mt-3 space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p className="text-xs font-medium text-slate-500">
+                Add a class the college doesn't have yet (e.g. FT, TTM). Only the name is required.
+              </p>
+              <input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Class name (e.g. FT)"
+                className="input"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  value={newCourse}
+                  onChange={(e) => setNewCourse(e.target.value)}
+                  placeholder="Course (optional)"
+                  className="input"
+                />
+                <input
+                  value={newYear}
+                  onChange={(e) => setNewYear(e.target.value)}
+                  placeholder="Year (optional)"
+                  type="number"
+                  min="1"
+                  max="5"
+                  className="input"
+                />
+              </div>
+              {classError && <p className="text-sm text-red-600">{classError}</p>}
+              <button
+                type="button"
+                onClick={createClass}
+                disabled={classBusy || !newName.trim()}
+                className="btn-primary w-full"
+              >
+                {classBusy ? "Adding…" : "Add class"}
+              </button>
+            </div>
+          )}
         </div>
 
         <div>
