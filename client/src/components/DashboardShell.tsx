@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { useAuth } from "../context/AuthContext";
+import { ChangePasswordModal } from "./ChangePasswordModal";
 
 /** A sidebar entry that switches the main view to the section with this id. */
 export type IconKey =
@@ -127,6 +128,7 @@ export function DashboardShell({
 }) {
   const { user, logout } = useAuth();
   const [active, setActive] = useState(nav[0]?.id ?? "");
+  const [changingPassword, setChangingPassword] = useState(false);
 
   const roleLabel = user ? ROLE_LABEL[user.role] ?? user.role : "";
   const fullName = user?.name ?? "";
@@ -174,12 +176,20 @@ export function DashboardShell({
               <p className="truncate text-xs text-slate-400">{roleLabel}</p>
             </div>
           </div>
-          <button
-            onClick={logout}
-            className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 active:scale-[0.98]"
-          >
-            Log out
-          </button>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setChangingPassword(true)}
+              className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 active:scale-[0.98]"
+            >
+              Password
+            </button>
+            <button
+              onClick={logout}
+              className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 active:scale-[0.98]"
+            >
+              Log out
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -190,12 +200,20 @@ export function DashboardShell({
             <img src="/jhc-logo.png" alt="Jai Hind College" className="h-8 w-auto" />
             <span className="font-bold tracking-tight text-slate-900">EventEase</span>
           </div>
-          <button
-            onClick={logout}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700"
-          >
-            Log out
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setChangingPassword(true)}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700"
+            >
+              Password
+            </button>
+            <button
+              onClick={logout}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700"
+            >
+              Log out
+            </button>
+          </div>
         </header>
         <nav className="flex gap-1.5 overflow-x-auto px-4 pb-2.5">
           {nav.map((item) => {
@@ -234,6 +252,8 @@ export function DashboardShell({
       </main>
 
       {children}
+
+      <ChangePasswordModal open={changingPassword} onClose={() => setChangingPassword(false)} />
     </div>
   );
 }

@@ -118,6 +118,37 @@ router.get("/me", requireAuth, async (req: AuthRequest, res) => {
   return res.json({ user });
 });
 
+// Any signed-in user can change their own password. They must prove they know
+// the current one, and the new one is validated the same way registration is.
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Enter your current password"),
+  newPassword: z.string().min(6, "New password must be at least 6 characters"),
+});
+
+router.post("/change-password", requireAuth, async (req: AuthRequest, res) => {
+  const parsed = changePasswordSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ message: parsed.error.issues[0].message });
+  }
+  const { currentPassword, newPassword } = parsed.data;
+
+  const user = await prisma.user.findUnique({ where: { id: req.user!.userId } });
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!ok) return res.status(401).json({ message: "Your current password is incorrect" });
+
+  if (currentPassword === newPassword) {
+    return res.status(400).json({ message: "The new password must be different from your current one" });
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash: await bcrypt.hash(newPassword, 10) },
+  });
+  return res.json({ message: "Password changed successfully" });
+});
+
 router.get("/admin-only", requireAuth, requireRole("ADMIN"), (_req: AuthRequest, res) => {
   return res.json({ message: "Secret admin data — you are an ADMIN." });
 });
