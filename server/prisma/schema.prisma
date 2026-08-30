@@ -54,6 +54,14 @@ enum RequestStatus {
   REJECTED
 }
 
+// A leader's position within their team. A team can have several HEADs and
+// several SUBHEADs; both have the same powers (a subhead is a junior head), so
+// this only distinguishes their title. An ordinary member has no teamRole.
+enum TeamRole {
+  HEAD
+  SUBHEAD
+}
+
 // One row per class the college teaches, e.g. TYIT.
 //
 // The course and year live HERE, not on every student, so "B.Sc. IT / year 3"
@@ -150,10 +158,11 @@ model User {
   teamId Int?
   team   Team? @relation("TeamMembership", fields: [teamId], references: [id], onDelete: SetNull)
 
-  // The teams this user is the head of. Assigning someone as a team's head also
-  // sets their role to TEAM_HEAD and enrols them in that team — all in one
-  // transaction, so the head is always a member of the club by construction.
-  teamsLed Team[] @relation("TeamHead")
+  // A leader's position on their team: HEAD or SUBHEAD (null for an ordinary
+  // member). A team can have several of each. Making someone a head/subhead also
+  // sets their global role to TEAM_HEAD and enrols them in that team, so a leader
+  // is always a member of their team by construction.
+  teamRole TeamRole?
 
   // ----- Module 4 -----
   // The attendance requests this volunteer has raised, plus the requests they
@@ -214,11 +223,8 @@ model Team {
   clubId Int
   club   Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
 
-  // The head of this team. Nullable: a team can exist before a head is assigned.
-  headId Int?
-  head   User? @relation("TeamHead", fields: [headId], references: [id], onDelete: SetNull)
-
-  // The volunteers on this team.
+  // The people on this team. A member with a teamRole of HEAD or SUBHEAD is a
+  // leader of the team; a team may have several of each.
   members User[] @relation("TeamMembership")
 
   createdAt DateTime @default(now())

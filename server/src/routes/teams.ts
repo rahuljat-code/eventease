@@ -10,16 +10,17 @@ const createSchema = z.object({
   name: z.string().min(2, "Team name must be at least 2 characters"),
   clubId: z.coerce.number().int().positive().optional(),
 });
-const assignHeadSchema = z.object({
+const assignLeaderSchema = z.object({
   userId: z.coerce.number().int().positive("Please choose a user"),
+  teamRole: z.enum(["HEAD", "SUBHEAD"]).optional(), // defaults to HEAD
 });
 
+// A team no longer has a single head: its leaders are the members whose teamRole
+// is HEAD or SUBHEAD. The members list carries teamRole so the UI can show them.
 const teamShape = {
   id: true,
   name: true,
   clubId: true,
-  headId: true,
-  head: { select: { id: true, name: true, email: true } },
   club: { select: { id: true, name: true, presidentId: true } },
   _count: { select: { members: true } },
   members: {
@@ -29,6 +30,7 @@ const teamShape = {
       name: true,
       rollNo: true,
       uid: true,
+      teamRole: true,
       class: { select: { name: true } },
     },
   },
@@ -60,9 +62,10 @@ router.get("/", requireAuth, requireRole("PRESIDENT", "ADMIN"), async (req: Auth
   return res.json({ teams });
 });
 
+// The team a Head/Subhead leads (they are a leader-member of exactly one team).
 router.get("/my", requireAuth, requireRole("TEAM_HEAD"), async (req: AuthRequest, res) => {
   const teams = await prisma.team.findMany({
-    where: { headId: req.user!.userId },
+    where: { members: { some: { id: req.user!.userId, teamRole: { not: null } } } },
     select: teamShape,
     orderBy: { name: "asc" },
   });
@@ -101,23 +104,24 @@ router.post("/", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest,
   return res.status(201).json({ team });
 });
 
-router.patch("/:id/head", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
+// Add a leader (HEAD or SUBHEAD) to a team. A team can have several of each.
+// This promotes the user to TEAM_HEAD and enrols them in the team.
+router.post("/:id/leaders", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
   const id = idParam(req.params.id);
   if (id === null) return res.status(400).json({ message: "Invalid team id" });
 
-  const parsed = assignHeadSchema.safeParse(req.body);
+  const parsed = assignLeaderSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ message: parsed.error.issues[0].message });
   }
   const { userId } = parsed.data;
+  const teamRole = parsed.data.teamRole ?? "HEAD";
 
   const team = await prisma.team.findUnique({
     where: { id },
     include: { club: { select: { presidentId: true } } },
   });
   if (!team) return res.status(404).json({ message: "Team not found" });
-
-  // *** ownership check ***
   if (team.club.presidentId !== req.user!.userId) {
     return res.status(403).json({ message: "You can only manage your own club's teams" });
   }
@@ -125,19 +129,19 @@ router.patch("/:id/head", requireAuth, requireRole("PRESIDENT"), async (req: Aut
     return res.status(404).json({ message: "User not found" });
   }
 
-  const [, updatedTeam] = await prisma.$transaction([
-    prisma.user.update({ where: { id: userId }, data: { role: Role.TEAM_HEAD, teamId: id } }),
-    prisma.team.update({ where: { id }, data: { headId: userId }, select: teamShape }),
-  ]);
-
+  const updatedTeam = await prisma.$transaction(async (tx) => {
+    await tx.user.update({ where: { id: userId }, data: { role: Role.TEAM_HEAD, teamId: id, teamRole } });
+    return tx.team.findUnique({ where: { id }, select: teamShape });
+  });
   return res.json({ team: updatedTeam });
 });
 
-// Remove a team's head. The user stays a member of the team but is demoted back
-// to VOLUNTEER if they no longer head any other team. President owns the club.
-router.delete("/:id/head", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
+// Remove one leader (demote to plain member). Leaders lead only their own team,
+// so this always returns them to VOLUNTEER; they stay a member of the team.
+router.delete("/:id/leaders/:userId", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
   const id = idParam(req.params.id);
-  if (id === null) return res.status(400).json({ message: "Invalid team id" });
+  const userId = idParam(req.params.userId);
+  if (id === null || userId === null) return res.status(400).json({ message: "Invalid id" });
 
   const team = await prisma.team.findUnique({
     where: { id },
@@ -147,19 +151,19 @@ router.delete("/:id/head", requireAuth, requireRole("PRESIDENT"), async (req: Au
   if (team.club.presidentId !== req.user!.userId) {
     return res.status(403).json({ message: "You can only manage your own club's teams" });
   }
-  if (team.headId === null) {
-    return res.status(400).json({ message: "This team has no head to remove" });
+
+  const member = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { teamId: true, teamRole: true },
+  });
+  if (!member || member.teamId !== id || member.teamRole === null) {
+    return res.status(404).json({ message: "That user is not a leader of this team" });
   }
-  const headId = team.headId;
-  const otherTeams = await prisma.team.count({ where: { headId, id: { not: id } } });
 
   const updatedTeam = await prisma.$transaction(async (tx) => {
-    if (otherTeams === 0) {
-      await tx.user.update({ where: { id: headId }, data: { role: Role.VOLUNTEER } });
-    }
-    return tx.team.update({ where: { id }, data: { headId: null }, select: teamShape });
+    await tx.user.update({ where: { id: userId }, data: { role: Role.VOLUNTEER, teamRole: null } });
+    return tx.team.findUnique({ where: { id }, select: teamShape });
   });
-
   return res.json({ team: updatedTeam });
 });
 
@@ -177,10 +181,16 @@ router.delete("/:id", requireAuth, requireRole("PRESIDENT"), async (req: AuthReq
     return res.status(403).json({ message: "You can only delete your own club's teams" });
   }
 
-  await prisma.team.delete({ where: { id } });
+  await prisma.$transaction(async (tx) => {
+    // Demote any leaders of this team back to plain volunteers before it goes.
+    await tx.user.updateMany({
+      where: { teamId: id, teamRole: { not: null } },
+      data: { role: Role.VOLUNTEER, teamRole: null },
+    });
+    await tx.team.delete({ where: { id } }); // SetNull clears remaining members' teamId
+  });
   return res.json({ message: "Team deleted" });
 });
-
 
 router.delete("/:id/members/:userId", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
   const id = idParam(req.params.id);
@@ -199,16 +209,20 @@ router.delete("/:id/members/:userId", requireAuth, requireRole("PRESIDENT"), asy
     return res.status(403).json({ message: "You can only manage your own club's teams" });
   }
 
-  const member = await prisma.user.findUnique({ where: { id: userId }, select: { teamId: true } });
+  const member = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { teamId: true, teamRole: true },
+  });
   if (!member || member.teamId !== id) {
     return res.status(404).json({ message: "That user is not a member of this team" });
   }
 
-  const ops = [prisma.user.update({ where: { id: userId }, data: { teamId: null } })];
-  if (team.headId === userId) {
-    ops.push(prisma.team.update({ where: { id }, data: { headId: null } }) as never);
-  }
-  await prisma.$transaction(ops);
+  // Leaving the team clears membership and any leadership; a leader also drops
+  // back to VOLUNTEER.
+  await prisma.user.update({
+    where: { id: userId },
+    data: { teamId: null, teamRole: null, ...(member.teamRole ? { role: Role.VOLUNTEER } : {}) },
+  });
 
   const updated = await prisma.team.findUnique({ where: { id }, select: teamShape });
   return res.json({ team: updated });

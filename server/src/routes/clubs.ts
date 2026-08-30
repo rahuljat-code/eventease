@@ -47,7 +47,11 @@ router.get("/browse", requireAuth, async (_req, res) => {
         select: {
           id: true,
           name: true,
-          head: { select: { id: true, name: true } },
+          members: {
+            where: { teamRole: { not: null } },
+            select: { id: true, name: true, teamRole: true },
+            orderBy: { teamRole: "asc" },
+          },
           _count: { select: { members: true } },
         },
       },

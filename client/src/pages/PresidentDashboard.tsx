@@ -8,6 +8,7 @@ import { Modal } from "../components/Modal";
 import { TeamsSection } from "./TeamsSection";
 import { RequestReviewList } from "../components/RequestReviewList";
 import { CreditVerifySection } from "./CreditVerifySection";
+import { MyRequestsSection } from "./MyRequestsSection";
 
 const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: "overview" },
@@ -15,6 +16,7 @@ const NAV: NavItem[] = [
   { id: "teams", label: "Teams", icon: "users" },
   { id: "requests", label: "Requests", icon: "doc" },
   { id: "credits", label: "CC Points", icon: "bolt" },
+  { id: "myattendance", label: "My Attendance", icon: "clipboard" },
 ];
 
 const STATUSES: EventStatus[] = ["UPCOMING", "ONGOING", "COMPLETED"];
@@ -158,6 +160,7 @@ export function PresidentDashboard() {
           />
         ),
         credits: <CreditVerifySection />,
+        myattendance: <MyRequestsSection hasTeam={true} />,
       }}
     >
       <EventModal open={creating} onClose={() => setCreating(false)} onDone={load} />

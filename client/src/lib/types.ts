@@ -61,11 +61,14 @@ export interface Club {
   _count?: { events: number };
 }
 
+export type TeamRole = "HEAD" | "SUBHEAD";
+
 export interface TeamMember {
   id: number;
   name: string;
   rollNo?: string | null;
   uid?: string | null;
+  teamRole?: TeamRole | null;
   class?: { name: string } | null;
 }
 
@@ -73,8 +76,6 @@ export interface Team {
   id: number;
   name: string;
   clubId: number;
-  headId?: number | null;
-  head?: { id: number; name: string; email: string } | null;
   club?: { id: number; name: string; presidentId: number | null };
   _count?: { members: number };
   members?: TeamMember[];
@@ -84,7 +85,7 @@ export interface Team {
 export interface BrowseTeam {
   id: number;
   name: string;
-  head?: { id: number; name: string } | null;
+  members?: { id: number; name: string; teamRole: TeamRole }[];
   _count?: { members: number };
 }
 export interface BrowseClub {

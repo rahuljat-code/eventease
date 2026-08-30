@@ -187,7 +187,9 @@ function PickTeamModal({ open, onClose }: { open: boolean; onClose: () => void }
             {selectedClub?.teams.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name}
-                {t.head ? ` (head: ${t.head.name})` : ""}
+                {t.members && t.members.length > 0
+                  ? ` (led by ${t.members.map((m) => m.name).join(", ")})`
+                  : ""}
               </option>
             ))}
           </select>

@@ -107,7 +107,7 @@ export function MyRequestsSection({ hasTeam }: { hasTeam: boolean }) {
                       Edit &amp; resubmit
                     </button>
                   )}
-                  {r.status === "PENDING_TEAM_HEAD" && (
+                  {(r.status === "PENDING_TEAM_HEAD" || r.status === "PENDING_PRESIDENT") && (
                     <button
                       onClick={() => withdraw(r)}
                       className="text-xs font-medium text-red-600 hover:underline"

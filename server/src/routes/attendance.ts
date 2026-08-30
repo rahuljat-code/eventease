@@ -63,17 +63,44 @@ async function clubsOf(userId: number) {
   return prisma.club.findMany({ where: { presidentId: userId }, select: { id: true } });
 }
 
-// The teams this user is Team Head of.
+// The team this user leads (as HEAD or SUBHEAD). A leader belongs to exactly one
+// team, so this is [] or a single { id, clubId }.
 async function teamsLedBy(userId: number) {
-  return prisma.team.findMany({ where: { headId: userId }, select: { id: true } });
+  const u = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { teamId: true, teamRole: true, team: { select: { clubId: true } } },
+  });
+  if (!u || u.teamRole === null || u.teamId === null || !u.team) return [];
+  return [{ id: u.teamId, clubId: u.team.clubId }];
 }
 
-// The volunteer's own profile bits we need: their team, its club, and their class.
-async function volunteerContext(userId: number) {
-  return prisma.user.findUnique({
+// What a requester (volunteer, head/subhead or president) may claim duty for: the
+// clubs whose events they can pick, plus their class (for the subject list).
+// Returns null if they cannot submit yet (no team / no club).
+async function requesterContext(userId: number, role: string) {
+  const me = await prisma.user.findUnique({
     where: { id: userId },
     select: { classId: true, teamId: true, team: { select: { clubId: true } } },
   });
+  if (!me) return null;
+  if (role === "PRESIDENT") {
+    const clubIds = (await clubsOf(userId)).map((c) => c.id);
+    if (clubIds.length === 0) return null;
+    return { classId: me.classId, clubIds };
+  }
+  // A volunteer, head or subhead routes through their own team's club.
+  if (!me.teamId || !me.team) return null;
+  return { classId: me.classId, clubIds: [me.team.clubId] };
+}
+
+// Where a new request starts, decided by the requester's role.
+//  - Volunteer      -> the team head must approve, then the president verifies.
+//  - Head / Subhead -> skips the head step, straight to the president.
+//  - President       -> auto-approved (they are the top of the club).
+function initialStatusFor(role: string): RequestStatus {
+  if (role === "PRESIDENT") return RequestStatus.APPROVED;
+  if (role === "TEAM_HEAD") return RequestStatus.PENDING_PRESIDENT;
+  return RequestStatus.PENDING_TEAM_HEAD;
 }
 
 const MAX_DAYS_FROM_EVENT = 7;
@@ -92,21 +119,21 @@ function checkLectureDate(lectureDate: Date, eventDate: Date): string | null {
   return null;
 }
 
-router.get("/options", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequest, res) => {
-  const me = await volunteerContext(req.user!.userId);
-  if (!me?.teamId || !me.team) {
+router.get("/options", requireAuth, requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"), async (req: AuthRequest, res) => {
+  const ctx = await requesterContext(req.user!.userId, req.user!.role);
+  if (!ctx) {
     return res.status(400).json({ message: "Join a team first — your requests go to your team head" });
   }
 
   const [events, subjects] = await Promise.all([
     prisma.event.findMany({
-      where: { clubId: me.team.clubId },
+      where: { clubId: { in: ctx.clubIds } },
       select: { id: true, name: true, eventDate: true },
       orderBy: { eventDate: "desc" },
     }),
-    me.classId
+    ctx.classId
       ? prisma.subject.findMany({
-          where: { classId: me.classId },
+          where: { classId: ctx.classId },
           select: { id: true, name: true, code: true },
           orderBy: { name: "asc" },
         })
@@ -116,16 +143,17 @@ router.get("/options", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRe
   return res.json({ events, subjects });
 });
 
-router.post("/", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequest, res) => {
+router.post("/", requireAuth, requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"), async (req: AuthRequest, res) => {
   const parsed = createSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ message: parsed.error.issues[0].message });
   }
   const { eventId, subjectId, lectureDate, lectureTime, teacherName, reason } = parsed.data;
   const volunteerId = req.user!.userId;
+  const role = req.user!.role;
 
-  const me = await volunteerContext(volunteerId);
-  if (!me?.teamId || !me.team) {
+  const ctx = await requesterContext(volunteerId, role);
+  if (!ctx) {
     return res.status(400).json({ message: "Join a team first — your requests go to your team head" });
   }
 
@@ -134,13 +162,13 @@ router.post("/", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequest,
     select: { clubId: true, eventDate: true },
   });
   if (!event) return res.status(404).json({ message: "Event not found" });
-  if (event.clubId !== me.team.clubId) {
+  if (!ctx.clubIds.includes(event.clubId)) {
     return res.status(403).json({ message: "You can only claim duty for your own club's events" });
   }
 
   const subject = await prisma.subject.findUnique({ where: { id: subjectId }, select: { classId: true } });
   if (!subject) return res.status(404).json({ message: "Subject not found" });
-  if (subject.classId !== me.classId) {
+  if (subject.classId !== ctx.classId) {
     return res.status(400).json({ message: "That subject is not taught in your class" });
   }
 
@@ -154,6 +182,18 @@ router.post("/", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequest,
     return res.status(409).json({ message: "You have already submitted a request for this lecture" });
   }
 
+  // A president's own request is auto-approved, so it is stamped as verified by
+  // them at creation; a volunteer's/head's request starts pending its approver.
+  const status = initialStatusFor(role);
+  const presidentStamp =
+    status === RequestStatus.APPROVED
+      ? {
+          presidentActionById: volunteerId,
+          presidentActionAt: new Date(),
+          presidentRemark: "Auto-approved (submitted by the club president)",
+        }
+      : {};
+
   try {
     const request = await prisma.attendanceRequest.create({
       data: {
@@ -164,6 +204,8 @@ router.post("/", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequest,
         lectureTime,
         teacherName,
         reason,
+        status,
+        ...presidentStamp,
       },
       select: requestShape,
     });
@@ -177,7 +219,7 @@ router.post("/", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequest,
   }
 });
 
-router.get("/mine", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequest, res) => {
+router.get("/mine", requireAuth, requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"), async (req: AuthRequest, res) => {
   const requests = await prisma.attendanceRequest.findMany({
     where: { volunteerId: req.user!.userId },
     select: requestShape,
@@ -186,7 +228,7 @@ router.get("/mine", requireAuth, requireRole("VOLUNTEER"), async (req: AuthReque
   return res.json({ requests });
 });
 
-router.patch("/:id", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequest, res) => {
+router.patch("/:id", requireAuth, requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"), async (req: AuthRequest, res) => {
   const id = idParam(req.params.id);
   if (id === null) return res.status(400).json({ message: "Invalid request id" });
 
@@ -206,8 +248,8 @@ router.patch("/:id", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequ
 
   const { eventId, subjectId, ...rest } = parsed.data;
 
-  const me = await volunteerContext(req.user!.userId);
-  if (!me?.teamId || !me.team) {
+  const ctx = await requesterContext(req.user!.userId, req.user!.role);
+  if (!ctx) {
     return res.status(400).json({ message: "Join a team first — your requests go to your team head" });
   }
   const finalEventId = eventId ?? existing.eventId;
@@ -219,7 +261,7 @@ router.patch("/:id", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequ
     select: { clubId: true, eventDate: true },
   });
   if (!event) return res.status(404).json({ message: "Event not found" });
-  if (event.clubId !== me.team.clubId) {
+  if (!ctx.clubIds.includes(event.clubId)) {
     return res.status(403).json({ message: "You can only claim duty for your own club's events" });
   }
 
@@ -228,7 +270,7 @@ router.patch("/:id", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequ
     select: { classId: true },
   });
   if (!subject) return res.status(404).json({ message: "Subject not found" });
-  if (subject.classId !== me.classId) {
+  if (subject.classId !== ctx.classId) {
     return res.status(400).json({ message: "That subject is not taught in your class" });
   }
 
@@ -242,7 +284,7 @@ router.patch("/:id", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequ
         ...rest,
         eventId: finalEventId,
         subjectId: finalSubjectId,
-        status: RequestStatus.PENDING_TEAM_HEAD,
+        status: initialStatusFor(req.user!.role),
         headActionById: null,
         headActionAt: null,
         headRemark: null,
@@ -261,7 +303,7 @@ router.patch("/:id", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequ
   }
 });
 
-router.delete("/:id", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequest, res) => {
+router.delete("/:id", requireAuth, requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"), async (req: AuthRequest, res) => {
   const id = idParam(req.params.id);
   if (id === null) return res.status(400).json({ message: "Invalid request id" });
 
@@ -270,8 +312,11 @@ router.delete("/:id", requireAuth, requireRole("VOLUNTEER"), async (req: AuthReq
   if (existing.volunteerId !== req.user!.userId) {
     return res.status(403).json({ message: "You can only withdraw your own requests" });
   }
-  if (existing.status !== RequestStatus.PENDING_TEAM_HEAD) {
-    return res.status(400).json({ message: "Only a request still awaiting your team head can be withdrawn" });
+  if (
+    existing.status !== RequestStatus.PENDING_TEAM_HEAD &&
+    existing.status !== RequestStatus.PENDING_PRESIDENT
+  ) {
+    return res.status(400).json({ message: "Only a request that is still pending can be withdrawn" });
   }
 
   await prisma.attendanceRequest.delete({ where: { id } });

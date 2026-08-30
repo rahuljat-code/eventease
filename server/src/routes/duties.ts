@@ -25,7 +25,12 @@ function idParam(raw: string): number | null {
 }
 
 async function teamsLedBy(userId: number) {
-  return prisma.team.findMany({ where: { headId: userId }, select: { id: true, clubId: true } });
+  const u = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { teamId: true, teamRole: true, team: { select: { clubId: true } } },
+  });
+  if (!u || u.teamRole === null || u.teamId === null || !u.team) return [];
+  return [{ id: u.teamId, clubId: u.team.clubId }];
 }
 
 const dutyShape = {

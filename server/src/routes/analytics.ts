@@ -125,8 +125,12 @@ async function presidentOverview(userId: number): Promise<Overview> {
 }
 
 async function teamHeadOverview(userId: number): Promise<Overview> {
-  const teams = await prisma.team.findMany({ where: { headId: userId }, select: { id: true } });
-  const teamIds = teams.map((t) => t.id);
+  // The team this head/subhead leads is their own team (leaders belong to it).
+  const me = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { teamId: true, teamRole: true },
+  });
+  const teamIds = me?.teamRole && me.teamId !== null ? [me.teamId] : [];
   const inTeam = { volunteer: { teamId: { in: teamIds } } };
 
   const [members, pendingApproval, actioned, awarded] = await Promise.all([

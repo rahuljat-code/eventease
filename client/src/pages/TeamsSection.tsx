@@ -78,13 +78,20 @@ export function TeamsSection() {
           {teams.map((team) => {
             const count = team._count?.members ?? 0;
             const isOpen = expanded.has(team.id);
+            const leaders = team.members?.filter((m) => m.teamRole) ?? [];
+            const leaderLabel =
+              leaders.length > 0
+                ? leaders
+                    .map((l) => `${l.name} (${l.teamRole === "SUBHEAD" ? "Subhead" : "Head"})`)
+                    .join(", ")
+                : "No leaders yet";
             return (
               <div key={team.id} className="rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06]">
                 <div className="flex items-center justify-between p-4">
                   <div>
                     <p className="font-medium text-slate-900">{team.name}</p>
                     <p className="mt-0.5 text-sm text-slate-500">
-                      {team.head ? `Head: ${team.head.name}` : "No head yet"} ·{" "}
+                      {leaderLabel} ·{" "}
                       <button
                         onClick={() => toggle(team.id)}
                         className="text-slate-500 underline decoration-dotted hover:text-slate-700"
@@ -98,7 +105,7 @@ export function TeamsSection() {
                       onClick={() => setAssigning(team)}
                       className="text-sm font-medium text-indigo-600 hover:underline"
                     >
-                      {team.head ? "Change head" : "Assign head"}
+                      Manage leaders
                     </button>
                     <button
                       onClick={() => remove(team)}
@@ -124,9 +131,9 @@ export function TeamsSection() {
                                   .filter(Boolean)
                                   .join(" · ")}
                               </span>
-                              {m.id === team.headId && (
+                              {m.teamRole && (
                                 <span className="ml-2 rounded bg-indigo-50 px-1.5 py-0.5 text-xs font-medium text-indigo-600">
-                                  head
+                                  {m.teamRole === "SUBHEAD" ? "subhead" : "head"}
                                 </span>
                               )}
                             </span>
@@ -149,7 +156,7 @@ export function TeamsSection() {
       )}
 
       <CreateTeamModal open={creating} onClose={() => setCreating(false)} onDone={load} />
-      <AssignHeadModal
+      <ManageLeadersModal
         team={assigning}
         users={users}
         onClose={() => setAssigning(null)}
@@ -210,8 +217,8 @@ function CreateTeamModal({
   );
 }
 
-/* ---------- Assign head ---------- */
-function AssignHeadModal({
+/* ---------- Manage leaders (multiple heads / subheads) ---------- */
+function ManageLeadersModal({
   team,
   users,
   onClose,
@@ -222,76 +229,115 @@ function AssignHeadModal({
   onClose: () => void;
   onDone: () => void;
 }) {
+  const [teamState, setTeamState] = useState<Team | null>(team);
   const [userId, setUserId] = useState("");
+  const [roleChoice, setRoleChoice] = useState<"HEAD" | "SUBHEAD">("HEAD");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  async function submit(e: FormEvent) {
-    e.preventDefault();
-    if (!team) return;
+  useEffect(() => {
+    setTeamState(team);
+    setUserId("");
+    setRoleChoice("HEAD");
+    setError("");
+  }, [team]);
+
+  const leaders = teamState?.members?.filter((m) => m.teamRole) ?? [];
+
+  async function add() {
+    if (!teamState || !userId) return;
+    setBusy(true);
     setError("");
     try {
-      await api.patch(`/teams/${team.id}/head`, { userId: Number(userId) });
+      const res = await api.post(`/teams/${teamState.id}/leaders`, {
+        userId: Number(userId),
+        teamRole: roleChoice,
+      });
+      setTeamState(res.data.team);
       setUserId("");
       onDone();
-      onClose();
     } catch (err) {
       setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+    } finally {
+      setBusy(false);
     }
   }
 
-  async function remove() {
-    if (!team) return;
+  async function removeLeader(id: number) {
+    if (!teamState) return;
     setError("");
     try {
-      await api.delete(`/teams/${team.id}/head`);
-      setUserId("");
+      const res = await api.delete(`/teams/${teamState.id}/leaders/${id}`);
+      setTeamState(res.data.team);
       onDone();
-      onClose();
     } catch (err) {
       setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
     }
   }
 
   return (
-    <Modal open={team !== null} onClose={onClose} title={`Assign head — ${team?.name ?? ""}`}>
-      <form onSubmit={submit} className="space-y-4">
+    <Modal open={team !== null} onClose={onClose} title={`Manage leaders — ${team?.name ?? ""}`}>
+      <div className="space-y-4">
         <p className="text-sm text-slate-500">
-          The chosen user becomes this team's head and is added to the team.
-          {team?.head && (
-            <>
-              {" "}
-              Current: <span className="font-medium text-slate-700">{team.head.name}</span> — picking
-              someone new replaces them.
-            </>
-          )}
+          A team can have several heads and subheads; both can approve the team's requests.
         </p>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">User</label>
+
+        {leaders.length > 0 && (
+          <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200">
+            {leaders.map((l) => (
+              <li key={l.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                <span className="text-slate-700">
+                  {l.name}
+                  <span className="ml-2 rounded bg-indigo-50 px-1.5 py-0.5 text-xs font-medium text-indigo-600">
+                    {l.teamRole === "SUBHEAD" ? "Subhead" : "Head"}
+                  </span>
+                </span>
+                <button
+                  onClick={() => removeLeader(l.id)}
+                  className="text-xs font-medium text-red-600 hover:underline"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <label className="block text-sm font-medium text-slate-700">Add a leader</label>
           <SearchSelect
             options={users.map((u) => ({ id: u.id, label: u.name, sub: `${u.email.split("@")[0]} · ${u.role}` }))}
             value={userId ? Number(userId) : ""}
             onChange={(id) => setUserId(String(id))}
             placeholder="Search for a student…"
           />
-        </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={!userId}
-          className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-        >
-          Assign
-        </button>
-        {team?.head && (
+          <div className="flex gap-2">
+            {(["HEAD", "SUBHEAD"] as const).map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setRoleChoice(r)}
+                className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                  roleChoice === r
+                    ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                    : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {r === "HEAD" ? "Head" : "Subhead"}
+              </button>
+            ))}
+          </div>
+          {error && <p className="text-sm text-red-600">{error}</p>}
           <button
             type="button"
-            onClick={remove}
-            className="w-full rounded-lg border border-red-200 bg-white py-2.5 text-sm font-medium text-red-600 hover:bg-red-50"
+            onClick={add}
+            disabled={busy || !userId}
+            className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
           >
-            Remove {team.head.name} as head
+            {busy ? "Adding…" : "Add leader"}
           </button>
-        )}
-      </form>
+        </div>
+      </div>
     </Modal>
   );
 }

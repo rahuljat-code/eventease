@@ -6,6 +6,7 @@ import { OverviewSection } from "../components/OverviewSection";
 import { RequestReviewList } from "../components/RequestReviewList";
 import { AwardCreditsSection } from "./AwardCreditsSection";
 import { DutyAssignSection } from "./DutyAssignSection";
+import { MyRequestsSection } from "./MyRequestsSection";
 
 const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: "overview" },
@@ -13,6 +14,7 @@ const NAV: NavItem[] = [
   { id: "requests", label: "Requests", icon: "doc" },
   { id: "award", label: "Award CC", icon: "medal" },
   { id: "duties", label: "Duties", icon: "clipboard" },
+  { id: "myattendance", label: "My Attendance", icon: "calendar" },
 ];
 
 export function TeamHeadDashboard() {
@@ -92,6 +94,7 @@ export function TeamHeadDashboard() {
         ),
         award: <AwardCreditsSection />,
         duties: <DutyAssignSection />,
+        myattendance: <MyRequestsSection hasTeam={true} />,
       }}
     />
   );
