@@ -35,11 +35,18 @@ async function requestsByStatus(where: object): Promise<Chart> {
   return {
     title: "Attendance requests by status",
     kind: "donut",
-    series: order.map((s) => ({ label: REQUEST_LABELS[s], value: counts.get(s) ?? 0, tone: REQUEST_TONES[s] })),
+    series: order.map((s) => ({
+      label: REQUEST_LABELS[s],
+      value: counts.get(s) ?? 0,
+      tone: REQUEST_TONES[s],
+    })),
   };
 }
 
-async function ccLeaderboard(volunteerWhere: object, title = "Top volunteers by CC points"): Promise<Chart | null> {
+async function ccLeaderboard(
+  volunteerWhere: object,
+  title = "Top volunteers by CC points",
+): Promise<Chart | null> {
   const grouped = await prisma.creditAward.groupBy({
     by: ["volunteerId"],
     where: { verifiedAt: { not: null }, volunteer: volunteerWhere },
@@ -57,7 +64,11 @@ async function ccLeaderboard(volunteerWhere: object, title = "Top volunteers by 
   return {
     title,
     kind: "bars",
-    series: withPoints.map((g) => ({ label: nameOf.get(g.volunteerId) ?? "—", value: g._sum.points ?? 0, tone: "indigo" })),
+    series: withPoints.map((g) => ({
+      label: nameOf.get(g.volunteerId) ?? "—",
+      value: g._sum.points ?? 0,
+      tone: "indigo",
+    })),
   };
 }
 
@@ -97,9 +108,15 @@ async function adminOverview(): Promise<Overview> {
 }
 
 async function presidentOverview(userId: number): Promise<Overview> {
-  const clubs = await prisma.club.findMany({ where: { presidentId: userId }, select: { id: true } });
+  const clubs = await prisma.club.findMany({
+    where: { presidentId: userId },
+    select: { id: true },
+  });
   const clubIds = clubs.map((c) => c.id);
-  const teams = await prisma.team.findMany({ where: { clubId: { in: clubIds } }, select: { id: true } });
+  const teams = await prisma.team.findMany({
+    where: { clubId: { in: clubIds } },
+    select: { id: true },
+  });
   const teamIds = teams.map((t) => t.id);
 
   const inClub = { volunteer: { teamId: { in: teamIds } } };
@@ -203,14 +220,22 @@ async function facultyOverview(): Promise<Overview> {
     prisma.user.count({ where: { classId: { not: null } } }),
     prisma.attendanceRequest.count({ where: { status: "APPROVED" } }),
   ]);
-  const cc = await prisma.creditAward.aggregate({ where: { verifiedAt: { not: null } }, _sum: { points: true } });
+  const cc = await prisma.creditAward.aggregate({
+    where: { verifiedAt: { not: null } },
+    _sum: { points: true },
+  });
 
   // Approved lectures per class — a small loop over the (few) classes.
-  const classRows = await prisma.class.findMany({ select: { id: true, name: true }, orderBy: { year: "asc" } });
+  const classRows = await prisma.class.findMany({
+    select: { id: true, name: true },
+    orderBy: { year: "asc" },
+  });
   const perClass = await Promise.all(
     classRows.map((c) =>
-      prisma.attendanceRequest.count({ where: { status: "APPROVED", volunteer: { classId: c.id } } })
-    )
+      prisma.attendanceRequest.count({
+        where: { status: "APPROVED", volunteer: { classId: c.id } },
+      }),
+    ),
   );
   const charts: Chart[] = [
     {
@@ -225,7 +250,12 @@ async function facultyOverview(): Promise<Overview> {
       { label: "Classes", value: classes, tone: "violet" },
       { label: "Students", value: students, tone: "slate" },
       { label: "Approved lectures", value: approved, tone: "emerald" },
-      { label: "CC points", value: cc._sum.points ?? 0, hint: "verified, all classes", tone: "indigo" },
+      {
+        label: "CC points",
+        value: cc._sum.points ?? 0,
+        hint: "verified, all classes",
+        tone: "indigo",
+      },
     ],
     charts,
   };

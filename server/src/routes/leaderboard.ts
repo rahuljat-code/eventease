@@ -34,11 +34,18 @@ router.get("/", requireAuth, async (req: AuthRequest, res) => {
   ]);
 
   const totals = new Map<number, number>();
-  for (const c of creditRows) totals.set(c.volunteerId, (totals.get(c.volunteerId) ?? 0) + (c._sum.points ?? 0));
-  for (const a of activityRows) totals.set(a.studentId, (totals.get(a.studentId) ?? 0) + a.activity.points);
+  for (const c of creditRows)
+    totals.set(c.volunteerId, (totals.get(c.volunteerId) ?? 0) + (c._sum.points ?? 0));
+  for (const a of activityRows)
+    totals.set(a.studentId, (totals.get(a.studentId) ?? 0) + a.activity.points);
 
   const ranked = students
-    .map((s) => ({ id: s.id, name: s.name, class: s.class?.name ?? null, points: totals.get(s.id) ?? 0 }))
+    .map((s) => ({
+      id: s.id,
+      name: s.name,
+      class: s.class?.name ?? null,
+      points: totals.get(s.id) ?? 0,
+    }))
     .filter((s) => s.points > 0)
     .sort((a, b) => b.points - a.points)
     .map((s, i) => ({ rank: i + 1, ...s, badge: badgeFor(s.points) }));

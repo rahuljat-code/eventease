@@ -60,7 +60,8 @@ export function CCActivitiesSection() {
               <div className="min-w-0">
                 <p className="font-medium text-slate-900">{a.title}</p>
                 <p className="mt-0.5 text-sm text-slate-500">
-                  {a.class.name} · {fmtDate(a.activityDate)} · {a.points} pt{a.points === 1 ? "" : "s"}
+                  {a.class.name} · {fmtDate(a.activityDate)} · {a.points} pt
+                  {a.points === 1 ? "" : "s"}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-3">
@@ -73,7 +74,10 @@ export function CCActivitiesSection() {
                 >
                   Mark attendance
                 </button>
-                <button onClick={() => remove(a)} className="text-sm font-medium text-red-600 hover:underline">
+                <button
+                  onClick={() => remove(a)}
+                  className="text-sm font-medium text-red-600 hover:underline"
+                >
                   Delete
                 </button>
               </div>
@@ -133,7 +137,7 @@ function CreateActivityModal({
       onDone();
       onClose();
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     }
   }
 
@@ -142,11 +146,22 @@ function CreateActivityModal({
       <form onSubmit={submit} className="space-y-4">
         <div>
           <label className="label">Activity title</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Blood Donation Camp" className="input" />
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            placeholder="Blood Donation Camp"
+            className="input"
+          />
         </div>
         <div>
           <label className="label">Class</label>
-          <select value={classId} onChange={(e) => setClassId(e.target.value)} required className="input">
+          <select
+            value={classId}
+            onChange={(e) => setClassId(e.target.value)}
+            required
+            className="input"
+          >
             <option value="" disabled>
               Select a class
             </option>
@@ -160,11 +175,25 @@ function CreateActivityModal({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label">Date</label>
-            <input type="date" value={activityDate} onChange={(e) => setActivityDate(e.target.value)} required className="input" />
+            <input
+              type="date"
+              value={activityDate}
+              onChange={(e) => setActivityDate(e.target.value)}
+              required
+              className="input"
+            />
           </div>
           <div>
             <label className="label">CC points</label>
-            <input type="number" min={0} value={points} onChange={(e) => setPoints(e.target.value)} required placeholder="5" className="input" />
+            <input
+              type="number"
+              min={0}
+              value={points}
+              onChange={(e) => setPoints(e.target.value)}
+              required
+              placeholder="5"
+              className="input"
+            />
           </div>
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -226,7 +255,11 @@ function RosterModal({
   const roster: CCRosterStudent[] = detail?.roster ?? [];
 
   return (
-    <Modal open={activityId !== null} onClose={onClose} title={detail ? detail.activity.title : "Loading…"}>
+    <Modal
+      open={activityId !== null}
+      onClose={onClose}
+      title={detail ? detail.activity.title : "Loading…"}
+    >
       {!detail ? (
         <p className="text-sm text-slate-500">Loading roster…</p>
       ) : (

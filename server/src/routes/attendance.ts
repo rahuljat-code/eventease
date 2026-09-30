@@ -119,209 +119,257 @@ function checkLectureDate(lectureDate: Date, eventDate: Date): string | null {
   return null;
 }
 
-router.get("/options", requireAuth, requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"), async (req: AuthRequest, res) => {
-  const ctx = await requesterContext(req.user!.userId, req.user!.role);
-  if (!ctx) {
-    return res.status(400).json({ message: "Join a team first — your requests go to your team head" });
-  }
-
-  const [events, subjects] = await Promise.all([
-    prisma.event.findMany({
-      where: { clubId: { in: ctx.clubIds } },
-      select: { id: true, name: true, eventDate: true },
-      orderBy: { eventDate: "desc" },
-    }),
-    ctx.classId
-      ? prisma.subject.findMany({
-          where: { classId: ctx.classId },
-          select: { id: true, name: true, code: true },
-          orderBy: { name: "asc" },
-        })
-      : Promise.resolve([]),
-  ]);
-
-  return res.json({ events, subjects });
-});
-
-router.post("/", requireAuth, requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"), async (req: AuthRequest, res) => {
-  const parsed = createSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ message: parsed.error.issues[0].message });
-  }
-  const { eventId, subjectId, lectureDate, lectureTime, teacherName, reason } = parsed.data;
-  const volunteerId = req.user!.userId;
-  const role = req.user!.role;
-
-  const ctx = await requesterContext(volunteerId, role);
-  if (!ctx) {
-    return res.status(400).json({ message: "Join a team first — your requests go to your team head" });
-  }
-
-  const event = await prisma.event.findUnique({
-    where: { id: eventId },
-    select: { clubId: true, eventDate: true },
-  });
-  if (!event) return res.status(404).json({ message: "Event not found" });
-  if (!ctx.clubIds.includes(event.clubId)) {
-    return res.status(403).json({ message: "You can only claim duty for your own club's events" });
-  }
-
-  const subject = await prisma.subject.findUnique({ where: { id: subjectId }, select: { classId: true } });
-  if (!subject) return res.status(404).json({ message: "Subject not found" });
-  if (subject.classId !== ctx.classId) {
-    return res.status(400).json({ message: "That subject is not taught in your class" });
-  }
-
-  const dateError = checkLectureDate(lectureDate, event.eventDate);
-  if (dateError) return res.status(400).json({ message: dateError });
-
-  const clash = await prisma.attendanceRequest.findUnique({
-    where: { volunteerId_subjectId_lectureDate: { volunteerId, subjectId, lectureDate } },
-  });
-  if (clash) {
-    return res.status(409).json({ message: "You have already submitted a request for this lecture" });
-  }
-
-  // A president's own request is auto-approved, so it is stamped as verified by
-  // them at creation; a volunteer's/head's request starts pending its approver.
-  const status = initialStatusFor(role);
-  const presidentStamp =
-    status === RequestStatus.APPROVED
-      ? {
-          presidentActionById: volunteerId,
-          presidentActionAt: new Date(),
-          presidentRemark: "Auto-approved (submitted by the club president)",
-        }
-      : {};
-
-  try {
-    const request = await prisma.attendanceRequest.create({
-      data: {
-        volunteerId,
-        eventId,
-        subjectId,
-        lectureDate,
-        lectureTime,
-        teacherName,
-        reason,
-        status,
-        ...presidentStamp,
-      },
-      select: requestShape,
-    });
-    return res.status(201).json({ request });
-  } catch (err) {
-    if ((err as { code?: string }).code === "P2002") {
-      return res.status(409).json({ message: "You have already submitted a request for this lecture" });
+router.get(
+  "/options",
+  requireAuth,
+  requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"),
+  async (req: AuthRequest, res) => {
+    const ctx = await requesterContext(req.user!.userId, req.user!.role);
+    if (!ctx) {
+      return res
+        .status(400)
+        .json({ message: "Join a team first — your requests go to your team head" });
     }
-    console.error("attendance create failed:", err);
-    return res.status(500).json({ message: "Something went wrong submitting your request" });
-  }
-});
 
-router.get("/mine", requireAuth, requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"), async (req: AuthRequest, res) => {
-  const requests = await prisma.attendanceRequest.findMany({
-    where: { volunteerId: req.user!.userId },
-    select: requestShape,
-    orderBy: { createdAt: "desc" },
-  });
-  return res.json({ requests });
-});
+    const [events, subjects] = await Promise.all([
+      prisma.event.findMany({
+        where: { clubId: { in: ctx.clubIds } },
+        select: { id: true, name: true, eventDate: true },
+        orderBy: { eventDate: "desc" },
+      }),
+      ctx.classId
+        ? prisma.subject.findMany({
+            where: { classId: ctx.classId },
+            select: { id: true, name: true, code: true },
+            orderBy: { name: "asc" },
+          })
+        : Promise.resolve([]),
+    ]);
 
-router.patch("/:id", requireAuth, requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"), async (req: AuthRequest, res) => {
-  const id = idParam(req.params.id);
-  if (id === null) return res.status(400).json({ message: "Invalid request id" });
+    return res.json({ events, subjects });
+  },
+);
 
-  const parsed = createSchema.partial().safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ message: parsed.error.issues[0].message });
-  }
-
-  const existing = await prisma.attendanceRequest.findUnique({ where: { id } });
-  if (!existing) return res.status(404).json({ message: "Request not found" });
-  if (existing.volunteerId !== req.user!.userId) {
-    return res.status(403).json({ message: "You can only edit your own requests" });
-  }
-  if (existing.status !== RequestStatus.REJECTED) {
-    return res.status(400).json({ message: "Only a rejected request can be edited and resubmitted" });
-  }
-
-  const { eventId, subjectId, ...rest } = parsed.data;
-
-  const ctx = await requesterContext(req.user!.userId, req.user!.role);
-  if (!ctx) {
-    return res.status(400).json({ message: "Join a team first — your requests go to your team head" });
-  }
-  const finalEventId = eventId ?? existing.eventId;
-  const finalSubjectId = subjectId ?? existing.subjectId;
-  const finalDate = rest.lectureDate ?? existing.lectureDate;
-
-  const event = await prisma.event.findUnique({
-    where: { id: finalEventId },
-    select: { clubId: true, eventDate: true },
-  });
-  if (!event) return res.status(404).json({ message: "Event not found" });
-  if (!ctx.clubIds.includes(event.clubId)) {
-    return res.status(403).json({ message: "You can only claim duty for your own club's events" });
-  }
-
-  const subject = await prisma.subject.findUnique({
-    where: { id: finalSubjectId },
-    select: { classId: true },
-  });
-  if (!subject) return res.status(404).json({ message: "Subject not found" });
-  if (subject.classId !== ctx.classId) {
-    return res.status(400).json({ message: "That subject is not taught in your class" });
-  }
-
-  const dateError = checkLectureDate(finalDate, event.eventDate);
-  if (dateError) return res.status(400).json({ message: dateError });
-
-  try {
-    const request = await prisma.attendanceRequest.update({
-      where: { id },
-      data: {
-        ...rest,
-        eventId: finalEventId,
-        subjectId: finalSubjectId,
-        status: initialStatusFor(req.user!.role),
-        headActionById: null,
-        headActionAt: null,
-        headRemark: null,
-        presidentActionById: null,
-        presidentActionAt: null,
-        presidentRemark: null,
-      },
-      select: requestShape,
-    });
-    return res.json({ request });
-  } catch (err) {
-    if ((err as { code?: string }).code === "P2002") {
-      return res.status(409).json({ message: "You have already submitted a request for this lecture" });
+router.post(
+  "/",
+  requireAuth,
+  requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"),
+  async (req: AuthRequest, res) => {
+    const parsed = createSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ message: parsed.error.issues[0].message });
     }
-    throw err;
-  }
-});
+    const { eventId, subjectId, lectureDate, lectureTime, teacherName, reason } = parsed.data;
+    const volunteerId = req.user!.userId;
+    const role = req.user!.role;
 
-router.delete("/:id", requireAuth, requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"), async (req: AuthRequest, res) => {
-  const id = idParam(req.params.id);
-  if (id === null) return res.status(400).json({ message: "Invalid request id" });
+    const ctx = await requesterContext(volunteerId, role);
+    if (!ctx) {
+      return res
+        .status(400)
+        .json({ message: "Join a team first — your requests go to your team head" });
+    }
 
-  const existing = await prisma.attendanceRequest.findUnique({ where: { id } });
-  if (!existing) return res.status(404).json({ message: "Request not found" });
-  if (existing.volunteerId !== req.user!.userId) {
-    return res.status(403).json({ message: "You can only withdraw your own requests" });
-  }
-  if (
-    existing.status !== RequestStatus.PENDING_TEAM_HEAD &&
-    existing.status !== RequestStatus.PENDING_PRESIDENT
-  ) {
-    return res.status(400).json({ message: "Only a request that is still pending can be withdrawn" });
-  }
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: { clubId: true, eventDate: true },
+    });
+    if (!event) return res.status(404).json({ message: "Event not found" });
+    if (!ctx.clubIds.includes(event.clubId)) {
+      return res
+        .status(403)
+        .json({ message: "You can only claim duty for your own club's events" });
+    }
 
-  await prisma.attendanceRequest.delete({ where: { id } });
-  return res.json({ message: "Request withdrawn" });
-});
+    const subject = await prisma.subject.findUnique({
+      where: { id: subjectId },
+      select: { classId: true },
+    });
+    if (!subject) return res.status(404).json({ message: "Subject not found" });
+    if (subject.classId !== ctx.classId) {
+      return res.status(400).json({ message: "That subject is not taught in your class" });
+    }
+
+    const dateError = checkLectureDate(lectureDate, event.eventDate);
+    if (dateError) return res.status(400).json({ message: dateError });
+
+    const clash = await prisma.attendanceRequest.findUnique({
+      where: { volunteerId_subjectId_lectureDate: { volunteerId, subjectId, lectureDate } },
+    });
+    if (clash) {
+      return res
+        .status(409)
+        .json({ message: "You have already submitted a request for this lecture" });
+    }
+
+    // A president's own request is auto-approved, so it is stamped as verified by
+    // them at creation; a volunteer's/head's request starts pending its approver.
+    const status = initialStatusFor(role);
+    const presidentStamp =
+      status === RequestStatus.APPROVED
+        ? {
+            presidentActionById: volunteerId,
+            presidentActionAt: new Date(),
+            presidentRemark: "Auto-approved (submitted by the club president)",
+          }
+        : {};
+
+    try {
+      const request = await prisma.attendanceRequest.create({
+        data: {
+          volunteerId,
+          eventId,
+          subjectId,
+          lectureDate,
+          lectureTime,
+          teacherName,
+          reason,
+          status,
+          ...presidentStamp,
+        },
+        select: requestShape,
+      });
+      return res.status(201).json({ request });
+    } catch (err) {
+      if ((err as { code?: string }).code === "P2002") {
+        return res
+          .status(409)
+          .json({ message: "You have already submitted a request for this lecture" });
+      }
+      console.error("attendance create failed:", err);
+      return res.status(500).json({ message: "Something went wrong submitting your request" });
+    }
+  },
+);
+
+router.get(
+  "/mine",
+  requireAuth,
+  requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"),
+  async (req: AuthRequest, res) => {
+    const requests = await prisma.attendanceRequest.findMany({
+      where: { volunteerId: req.user!.userId },
+      select: requestShape,
+      orderBy: { createdAt: "desc" },
+    });
+    return res.json({ requests });
+  },
+);
+
+router.patch(
+  "/:id",
+  requireAuth,
+  requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"),
+  async (req: AuthRequest, res) => {
+    const id = idParam(req.params.id);
+    if (id === null) return res.status(400).json({ message: "Invalid request id" });
+
+    const parsed = createSchema.partial().safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ message: parsed.error.issues[0].message });
+    }
+
+    const existing = await prisma.attendanceRequest.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ message: "Request not found" });
+    if (existing.volunteerId !== req.user!.userId) {
+      return res.status(403).json({ message: "You can only edit your own requests" });
+    }
+    if (existing.status !== RequestStatus.REJECTED) {
+      return res
+        .status(400)
+        .json({ message: "Only a rejected request can be edited and resubmitted" });
+    }
+
+    const { eventId, subjectId, ...rest } = parsed.data;
+
+    const ctx = await requesterContext(req.user!.userId, req.user!.role);
+    if (!ctx) {
+      return res
+        .status(400)
+        .json({ message: "Join a team first — your requests go to your team head" });
+    }
+    const finalEventId = eventId ?? existing.eventId;
+    const finalSubjectId = subjectId ?? existing.subjectId;
+    const finalDate = rest.lectureDate ?? existing.lectureDate;
+
+    const event = await prisma.event.findUnique({
+      where: { id: finalEventId },
+      select: { clubId: true, eventDate: true },
+    });
+    if (!event) return res.status(404).json({ message: "Event not found" });
+    if (!ctx.clubIds.includes(event.clubId)) {
+      return res
+        .status(403)
+        .json({ message: "You can only claim duty for your own club's events" });
+    }
+
+    const subject = await prisma.subject.findUnique({
+      where: { id: finalSubjectId },
+      select: { classId: true },
+    });
+    if (!subject) return res.status(404).json({ message: "Subject not found" });
+    if (subject.classId !== ctx.classId) {
+      return res.status(400).json({ message: "That subject is not taught in your class" });
+    }
+
+    const dateError = checkLectureDate(finalDate, event.eventDate);
+    if (dateError) return res.status(400).json({ message: dateError });
+
+    try {
+      const request = await prisma.attendanceRequest.update({
+        where: { id },
+        data: {
+          ...rest,
+          eventId: finalEventId,
+          subjectId: finalSubjectId,
+          status: initialStatusFor(req.user!.role),
+          headActionById: null,
+          headActionAt: null,
+          headRemark: null,
+          presidentActionById: null,
+          presidentActionAt: null,
+          presidentRemark: null,
+        },
+        select: requestShape,
+      });
+      return res.json({ request });
+    } catch (err) {
+      if ((err as { code?: string }).code === "P2002") {
+        return res
+          .status(409)
+          .json({ message: "You have already submitted a request for this lecture" });
+      }
+      throw err;
+    }
+  },
+);
+
+router.delete(
+  "/:id",
+  requireAuth,
+  requireRole("VOLUNTEER", "TEAM_HEAD", "PRESIDENT"),
+  async (req: AuthRequest, res) => {
+    const id = idParam(req.params.id);
+    if (id === null) return res.status(400).json({ message: "Invalid request id" });
+
+    const existing = await prisma.attendanceRequest.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ message: "Request not found" });
+    if (existing.volunteerId !== req.user!.userId) {
+      return res.status(403).json({ message: "You can only withdraw your own requests" });
+    }
+    if (
+      existing.status !== RequestStatus.PENDING_TEAM_HEAD &&
+      existing.status !== RequestStatus.PENDING_PRESIDENT
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Only a request that is still pending can be withdrawn" });
+    }
+
+    await prisma.attendanceRequest.delete({ where: { id } });
+    return res.json({ message: "Request withdrawn" });
+  },
+);
 
 router.get("/team", requireAuth, requireRole("TEAM_HEAD"), async (req: AuthRequest, res) => {
   const userId = req.user!.userId;
@@ -385,7 +433,6 @@ router.patch("/:id/head", requireAuth, requireRole("TEAM_HEAD"), async (req: Aut
   return res.json({ request: updated });
 });
 
-
 router.get("/club", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
   const userId = req.user!.userId;
 
@@ -411,45 +458,50 @@ router.get("/club", requireAuth, requireRole("PRESIDENT"), async (req: AuthReque
   return res.json({ requests });
 });
 
-router.patch("/:id/president", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
-  const id = idParam(req.params.id);
-  if (id === null) return res.status(400).json({ message: "Invalid request id" });
+router.patch(
+  "/:id/president",
+  requireAuth,
+  requireRole("PRESIDENT"),
+  async (req: AuthRequest, res) => {
+    const id = idParam(req.params.id);
+    if (id === null) return res.status(400).json({ message: "Invalid request id" });
 
-  const parsed = actionSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ message: parsed.error.issues[0].message });
-  }
-  const { action, remark } = parsed.data;
+    const parsed = actionSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ message: parsed.error.issues[0].message });
+    }
+    const { action, remark } = parsed.data;
 
-  const request = await prisma.attendanceRequest.findUnique({
-    where: { id },
-    include: { volunteer: { select: { team: { select: { clubId: true } } } } },
-  });
-  if (!request) return res.status(404).json({ message: "Request not found" });
+    const request = await prisma.attendanceRequest.findUnique({
+      where: { id },
+      include: { volunteer: { select: { team: { select: { clubId: true } } } } },
+    });
+    if (!request) return res.status(404).json({ message: "Request not found" });
 
-  // *** ownership: the volunteer's team must belong to a club this user leads ***
-  const clubIds = (await clubsOf(req.user!.userId)).map((c) => c.id);
-  const clubId = request.volunteer.team?.clubId;
-  if (!clubId || !clubIds.includes(clubId)) {
-    return res.status(403).json({ message: "You can only verify your own club's requests" });
-  }
+    // *** ownership: the volunteer's team must belong to a club this user leads ***
+    const clubIds = (await clubsOf(req.user!.userId)).map((c) => c.id);
+    const clubId = request.volunteer.team?.clubId;
+    if (!clubId || !clubIds.includes(clubId)) {
+      return res.status(403).json({ message: "You can only verify your own club's requests" });
+    }
 
-  // *** the order guard: the Team Head must have approved it first ***
-  if (request.status !== RequestStatus.PENDING_PRESIDENT) {
-    return res.status(409).json({ message: "This request is not waiting for your verification" });
-  }
+    // *** the order guard: the Team Head must have approved it first ***
+    if (request.status !== RequestStatus.PENDING_PRESIDENT) {
+      return res.status(409).json({ message: "This request is not waiting for your verification" });
+    }
 
-  const updated = await prisma.attendanceRequest.update({
-    where: { id },
-    data: {
-      status: action === "APPROVE" ? RequestStatus.APPROVED : RequestStatus.REJECTED,
-      presidentActionById: req.user!.userId,
-      presidentActionAt: new Date(),
-      presidentRemark: remark,
-    },
-    select: requestShape,
-  });
-  return res.json({ request: updated });
-});
+    const updated = await prisma.attendanceRequest.update({
+      where: { id },
+      data: {
+        status: action === "APPROVE" ? RequestStatus.APPROVED : RequestStatus.REJECTED,
+        presidentActionById: req.user!.userId,
+        presidentActionAt: new Date(),
+        presidentRemark: remark,
+      },
+      select: requestShape,
+    });
+    return res.json({ request: updated });
+  },
+);
 
 export default router;

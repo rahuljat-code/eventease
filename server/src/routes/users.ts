@@ -11,7 +11,9 @@ const ROLES = ["VOLUNTEER", "TEAM_HEAD", "PRESIDENT", "FACULTY", "ADMIN"];
 
 router.get("/", requireAuth, requireRole("ADMIN", "PRESIDENT"), async (req, res) => {
   const role =
-    typeof req.query.role === "string" && ROLES.includes(req.query.role) ? (req.query.role as Role) : undefined;
+    typeof req.query.role === "string" && ROLES.includes(req.query.role)
+      ? (req.query.role as Role)
+      : undefined;
   const users = await prisma.user.findMany({
     where: role ? { role } : {},
     select: { id: true, name: true, email: true, role: true, department: true, phone: true },
@@ -69,7 +71,7 @@ const importStudentsSchema = z.object({
         rollNo: z.string().trim().min(1),
         uid: z.string().trim().min(1),
         name: z.string().trim().min(1),
-      })
+      }),
     )
     .min(1, "The sheet has no student rows"),
 });
@@ -124,10 +126,12 @@ router.post("/import-students", requireAuth, requireRole("ADMIN"), async (req, r
 router.delete("/:id", requireAuth, requireRole("ADMIN"), async (req: AuthRequest, res) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id < 1) return res.status(400).json({ message: "Invalid user id" });
-  if (id === req.user!.userId) return res.status(400).json({ message: "You cannot delete your own account" });
+  if (id === req.user!.userId)
+    return res.status(400).json({ message: "You cannot delete your own account" });
   const target = await prisma.user.findUnique({ where: { id }, select: { role: true } });
   if (!target) return res.status(404).json({ message: "User not found" });
-  if (target.role === "ADMIN") return res.status(403).json({ message: "Admin accounts cannot be deleted here" });
+  if (target.role === "ADMIN")
+    return res.status(403).json({ message: "Admin accounts cannot be deleted here" });
   await prisma.user.delete({ where: { id } });
   return res.json({ message: "Account deleted" });
 });

@@ -58,7 +58,11 @@ export function RequestReviewList({
       await api.patch(actionUrl(req.id), { action, remark });
       await load();
     } catch (err) {
-      alert(axios.isAxiosError(err) ? err.response?.data?.message ?? "Something went wrong" : "Something went wrong");
+      alert(
+        axios.isAxiosError(err)
+          ? (err.response?.data?.message ?? "Something went wrong")
+          : "Something went wrong",
+      );
     } finally {
       setBusy(null);
     }
@@ -92,7 +96,10 @@ export function RequestReviewList({
       ) : (
         <div className="space-y-3">
           {requests.map((r) => (
-            <div key={r.id} className="rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06] p-4">
+            <div
+              key={r.id}
+              className="rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06] p-4"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <p className="font-medium text-slate-900">
@@ -104,8 +111,8 @@ export function RequestReviewList({
                     </span>
                   </p>
                   <p className="mt-1 text-sm text-slate-600">
-                    Missed <span className="font-medium">{r.subject.name}</span> ({r.subject.code}) on{" "}
-                    {fmtDate(r.lectureDate)}, {r.lectureTime} — {r.teacherName}
+                    Missed <span className="font-medium">{r.subject.name}</span> ({r.subject.code})
+                    on {fmtDate(r.lectureDate)}, {r.lectureTime} — {r.teacherName}
                   </p>
                   <p className="mt-0.5 text-sm text-slate-500">
                     On duty for <span className="font-medium text-slate-700">{r.event.name}</span>
@@ -113,8 +120,7 @@ export function RequestReviewList({
                   {r.reason && <p className="mt-1 text-sm italic text-slate-500">“{r.reason}”</p>}
                   {r.headRemark && (
                     <p className="mt-1 text-xs text-slate-400">
-                      Team Head: “{r.headRemark}”
-                      {r.headActionBy ? ` — ${r.headActionBy.name}` : ""}
+                      Team Head: “{r.headRemark}”{r.headActionBy ? ` — ${r.headActionBy.name}` : ""}
                     </p>
                   )}
                 </div>
@@ -146,7 +152,9 @@ export function RequestReviewList({
                           : "bg-blue-50 text-blue-700"
                     }`}
                   >
-                    {r.status === "PENDING_PRESIDENT" ? "Sent to president" : r.status.toLowerCase()}
+                    {r.status === "PENDING_PRESIDENT"
+                      ? "Sent to president"
+                      : r.status.toLowerCase()}
                   </span>
                 )}
               </div>

@@ -54,12 +54,20 @@ router.post("/", requireAuth, requireRole("TEAM_HEAD"), async (req: AuthRequest,
   const teamIds = teams.map((t) => t.id);
   const clubIds = new Set(teams.map((t) => t.clubId));
 
-  const member = await prisma.user.findUnique({ where: { id: assignedToId }, select: { teamId: true } });
+  const member = await prisma.user.findUnique({
+    where: { id: assignedToId },
+    select: { teamId: true },
+  });
   if (!member || member.teamId === null || !teamIds.includes(member.teamId)) {
-    return res.status(403).json({ message: "You can only assign duties to your own team's volunteers" });
+    return res
+      .status(403)
+      .json({ message: "You can only assign duties to your own team's volunteers" });
   }
   if (eventId) {
-    const event = await prisma.event.findUnique({ where: { id: eventId }, select: { clubId: true } });
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: { clubId: true },
+    });
     if (!event) return res.status(404).json({ message: "Event not found" });
     if (!clubIds.has(event.clubId)) {
       return res.status(403).json({ message: "You can only use your own club's events" });
@@ -94,21 +102,29 @@ router.get("/mine", requireAuth, requireRole("VOLUNTEER"), async (req: AuthReque
 });
 
 // Volunteer: toggle one of their duties done / pending.
-router.patch("/:id/status", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequest, res) => {
-  const id = idParam(req.params.id);
-  if (id === null) return res.status(400).json({ message: "Invalid duty id" });
-  const duty = await prisma.duty.findUnique({ where: { id }, select: { assignedToId: true, status: true } });
-  if (!duty) return res.status(404).json({ message: "Duty not found" });
-  if (duty.assignedToId !== req.user!.userId) {
-    return res.status(403).json({ message: "This duty isn't assigned to you" });
-  }
-  const updated = await prisma.duty.update({
-    where: { id },
-    data: { status: duty.status === "DONE" ? "PENDING" : "DONE" },
-    select: dutyShape,
-  });
-  return res.json({ duty: updated });
-});
+router.patch(
+  "/:id/status",
+  requireAuth,
+  requireRole("VOLUNTEER"),
+  async (req: AuthRequest, res) => {
+    const id = idParam(req.params.id);
+    if (id === null) return res.status(400).json({ message: "Invalid duty id" });
+    const duty = await prisma.duty.findUnique({
+      where: { id },
+      select: { assignedToId: true, status: true },
+    });
+    if (!duty) return res.status(404).json({ message: "Duty not found" });
+    if (duty.assignedToId !== req.user!.userId) {
+      return res.status(403).json({ message: "This duty isn't assigned to you" });
+    }
+    const updated = await prisma.duty.update({
+      where: { id },
+      data: { status: duty.status === "DONE" ? "PENDING" : "DONE" },
+      select: dutyShape,
+    });
+    return res.json({ duty: updated });
+  },
+);
 
 // Head: delete a duty they assigned.
 router.delete("/:id", requireAuth, requireRole("TEAM_HEAD"), async (req: AuthRequest, res) => {

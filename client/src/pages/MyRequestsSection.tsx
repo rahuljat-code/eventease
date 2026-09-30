@@ -40,7 +40,8 @@ export function MyRequestsSection({ hasTeam }: { hasTeam: boolean }) {
   }, []);
 
   async function withdraw(r: AttendanceRequest) {
-    if (!confirm(`Withdraw your request for ${r.subject.name} on ${fmtDate(r.lectureDate)}?`)) return;
+    if (!confirm(`Withdraw your request for ${r.subject.name} on ${fmtDate(r.lectureDate)}?`))
+      return;
     await api.delete(`/attendance/${r.id}`);
     load();
   }
@@ -73,7 +74,10 @@ export function MyRequestsSection({ hasTeam }: { hasTeam: boolean }) {
       ) : (
         <div className="space-y-3">
           {requests.map((r) => (
-            <div key={r.id} className="rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06] p-4">
+            <div
+              key={r.id}
+              className="rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06] p-4"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="font-medium text-slate-900">
@@ -159,9 +163,7 @@ function RequestModal({
     api
       .get("/attendance/options")
       .then((res) => setOptions(res.data))
-      .catch(() =>
-        setError("Could not load your club's events. Have you joined a team?")
-      );
+      .catch(() => setError("Could not load your club's events. Have you joined a team?"));
 
     if (editing) {
       setEventId(String(editing.event.id));
@@ -198,7 +200,7 @@ function RequestModal({
       onDone();
       onClose();
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     } finally {
       setBusy(false);
     }
@@ -212,7 +214,12 @@ function RequestModal({
     >
       <form onSubmit={submit} className="space-y-4">
         <Field label="Event you were on duty for">
-          <select value={eventId} onChange={(e) => setEventId(e.target.value)} required className={INPUT}>
+          <select
+            value={eventId}
+            onChange={(e) => setEventId(e.target.value)}
+            required
+            className={INPUT}
+          >
             <option value="" disabled>
               Select an event
             </option>
@@ -225,7 +232,12 @@ function RequestModal({
         </Field>
 
         <Field label="Subject of the missed lecture">
-          <select value={subjectId} onChange={(e) => setSubjectId(e.target.value)} required className={INPUT}>
+          <select
+            value={subjectId}
+            onChange={(e) => setSubjectId(e.target.value)}
+            required
+            className={INPUT}
+          >
             <option value="" disabled>
               Select a subject
             </option>

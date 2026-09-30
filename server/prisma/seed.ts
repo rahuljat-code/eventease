@@ -114,7 +114,12 @@ async function main() {
   // ----- Staff: only the Admin and one teacher to start with -----
   const staff = [
     { name: "Admin", email: "admin@eventease.local", password: "W3L", role: Role.ADMIN },
-    { name: "Preeti Shelar", email: "preeti@eventease.local", password: "preeti123", role: Role.FACULTY },
+    {
+      name: "Preeti Shelar",
+      email: "preeti@eventease.local",
+      password: "preeti123",
+      role: Role.FACULTY,
+    },
   ];
   // Remove every other account (old demo staff + all students) — students are
   // re-imported clean below, so nobody is left promoted.
@@ -138,11 +143,11 @@ async function main() {
   await prisma.user.deleteMany({ where: { role: "VOLUNTEER" } });
 
   const roster: Record<string, { rollNo: string; uid: string; name: string }[]> = JSON.parse(
-    fs.readFileSync(path.join(__dirname, "roster.json"), "utf8")
+    fs.readFileSync(path.join(__dirname, "roster.json"), "utf8"),
   );
   const studentHash = await bcrypt.hash("student123", 10);
   const classByName = new Map(
-    (await prisma.class.findMany({ select: { id: true, name: true } })).map((c) => [c.name, c.id])
+    (await prisma.class.findMany({ select: { id: true, name: true } })).map((c) => [c.name, c.id]),
   );
   // Build the whole roster as one array and insert it in a single round-trip.
   // (Per-row upserts are hundreds of round-trips — far too slow to a remote DB.)
@@ -160,11 +165,15 @@ async function main() {
       classId,
     }));
   });
-  const { count: imported } = await prisma.user.createMany({ data: studentData, skipDuplicates: true });
+  const { count: imported } = await prisma.user.createMany({
+    data: studentData,
+    skipDuplicates: true,
+  });
 
   console.log(`\nSeed complete. Imported ${imported} students.`);
   console.log("Logins (username / password):");
-  for (const u of staff) console.log(`  ${u.role.padEnd(8)}  ${u.email.split("@")[0]}  /  ${u.password}`);
+  for (const u of staff)
+    console.log(`  ${u.role.padEnd(8)}  ${u.email.split("@")[0]}  /  ${u.password}`);
   console.log("  Student   <uid>  /  student123   (e.g. 24bit044)");
   console.log("");
 }

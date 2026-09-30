@@ -79,14 +79,21 @@ router.put("/", requireAuth, requireRole("TEAM_HEAD"), async (req: AuthRequest, 
   const teamIds = teams.map((t) => t.id);
   const clubIds = new Set(teams.map((t) => t.clubId));
 
-  const volunteer = await prisma.user.findUnique({ where: { id: volunteerId }, select: { teamId: true } });
+  const volunteer = await prisma.user.findUnique({
+    where: { id: volunteerId },
+    select: { teamId: true },
+  });
   if (!volunteer || volunteer.teamId === null || !teamIds.includes(volunteer.teamId)) {
-    return res.status(403).json({ message: "You can only award points to your own team's volunteers" });
+    return res
+      .status(403)
+      .json({ message: "You can only award points to your own team's volunteers" });
   }
   const event = await prisma.event.findUnique({ where: { id: eventId }, select: { clubId: true } });
   if (!event) return res.status(404).json({ message: "Event not found" });
   if (!clubIds.has(event.clubId)) {
-    return res.status(403).json({ message: "You can only award points for your own club's events" });
+    return res
+      .status(403)
+      .json({ message: "You can only award points for your own club's events" });
   }
 
   const existing = await prisma.creditAward.findUnique({
@@ -94,7 +101,9 @@ router.put("/", requireAuth, requireRole("TEAM_HEAD"), async (req: AuthRequest, 
     select: { verifiedAt: true },
   });
   if (existing?.verifiedAt) {
-    return res.status(409).json({ message: "These points are already verified and can no longer be changed" });
+    return res
+      .status(409)
+      .json({ message: "These points are already verified and can no longer be changed" });
   }
 
   const award = await prisma.creditAward.upsert({
@@ -121,29 +130,37 @@ router.get("/club", requireAuth, requireRole("PRESIDENT"), async (req: AuthReque
   return res.json({ awards });
 });
 
-router.patch("/:id/verify", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
-  const id = idParam(req.params.id);
-  if (id === null) return res.status(400).json({ message: "Invalid credit id" });
+router.patch(
+  "/:id/verify",
+  requireAuth,
+  requireRole("PRESIDENT"),
+  async (req: AuthRequest, res) => {
+    const id = idParam(req.params.id);
+    if (id === null) return res.status(400).json({ message: "Invalid credit id" });
 
-  const award = await prisma.creditAward.findUnique({
-    where: { id },
-    select: { verifiedAt: true, volunteer: { select: { team: { select: { club: { select: { presidentId: true } } } } } } },
-  });
-  if (!award) return res.status(404).json({ message: "Credit award not found" });
-  if (award.volunteer.team?.club.presidentId !== req.user!.userId) {
-    return res.status(403).json({ message: "You can only verify your own club's credits" });
-  }
-  if (award.verifiedAt) {
-    return res.status(409).json({ message: "This credit is already verified" });
-  }
+    const award = await prisma.creditAward.findUnique({
+      where: { id },
+      select: {
+        verifiedAt: true,
+        volunteer: { select: { team: { select: { club: { select: { presidentId: true } } } } } },
+      },
+    });
+    if (!award) return res.status(404).json({ message: "Credit award not found" });
+    if (award.volunteer.team?.club.presidentId !== req.user!.userId) {
+      return res.status(403).json({ message: "You can only verify your own club's credits" });
+    }
+    if (award.verifiedAt) {
+      return res.status(409).json({ message: "This credit is already verified" });
+    }
 
-  const updated = await prisma.creditAward.update({
-    where: { id },
-    data: { verifiedById: req.user!.userId, verifiedAt: new Date() },
-    select: creditShape,
-  });
-  return res.json({ award: updated });
-});
+    const updated = await prisma.creditAward.update({
+      where: { id },
+      data: { verifiedById: req.user!.userId, verifiedAt: new Date() },
+      select: creditShape,
+    });
+    return res.json({ award: updated });
+  },
+);
 
 router.delete("/:id", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
   const id = idParam(req.params.id);
@@ -151,7 +168,9 @@ router.delete("/:id", requireAuth, requireRole("PRESIDENT"), async (req: AuthReq
 
   const award = await prisma.creditAward.findUnique({
     where: { id },
-    select: { volunteer: { select: { team: { select: { club: { select: { presidentId: true } } } } } } },
+    select: {
+      volunteer: { select: { team: { select: { club: { select: { presidentId: true } } } } } },
+    },
   });
   if (!award) return res.status(404).json({ message: "Credit award not found" });
   if (award.volunteer.team?.club.presidentId !== req.user!.userId) {

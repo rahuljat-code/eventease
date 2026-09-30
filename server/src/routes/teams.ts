@@ -106,66 +106,82 @@ router.post("/", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest,
 
 // Add a leader (HEAD or SUBHEAD) to a team. A team can have several of each.
 // This promotes the user to TEAM_HEAD and enrols them in the team.
-router.post("/:id/leaders", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
-  const id = idParam(req.params.id);
-  if (id === null) return res.status(400).json({ message: "Invalid team id" });
+router.post(
+  "/:id/leaders",
+  requireAuth,
+  requireRole("PRESIDENT"),
+  async (req: AuthRequest, res) => {
+    const id = idParam(req.params.id);
+    if (id === null) return res.status(400).json({ message: "Invalid team id" });
 
-  const parsed = assignLeaderSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ message: parsed.error.issues[0].message });
-  }
-  const { userId } = parsed.data;
-  const teamRole = parsed.data.teamRole ?? "HEAD";
+    const parsed = assignLeaderSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ message: parsed.error.issues[0].message });
+    }
+    const { userId } = parsed.data;
+    const teamRole = parsed.data.teamRole ?? "HEAD";
 
-  const team = await prisma.team.findUnique({
-    where: { id },
-    include: { club: { select: { presidentId: true } } },
-  });
-  if (!team) return res.status(404).json({ message: "Team not found" });
-  if (team.club.presidentId !== req.user!.userId) {
-    return res.status(403).json({ message: "You can only manage your own club's teams" });
-  }
-  if (!(await prisma.user.findUnique({ where: { id: userId } }))) {
-    return res.status(404).json({ message: "User not found" });
-  }
+    const team = await prisma.team.findUnique({
+      where: { id },
+      include: { club: { select: { presidentId: true } } },
+    });
+    if (!team) return res.status(404).json({ message: "Team not found" });
+    if (team.club.presidentId !== req.user!.userId) {
+      return res.status(403).json({ message: "You can only manage your own club's teams" });
+    }
+    if (!(await prisma.user.findUnique({ where: { id: userId } }))) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-  const updatedTeam = await prisma.$transaction(async (tx) => {
-    await tx.user.update({ where: { id: userId }, data: { role: Role.TEAM_HEAD, teamId: id, teamRole } });
-    return tx.team.findUnique({ where: { id }, select: teamShape });
-  });
-  return res.json({ team: updatedTeam });
-});
+    const updatedTeam = await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: userId },
+        data: { role: Role.TEAM_HEAD, teamId: id, teamRole },
+      });
+      return tx.team.findUnique({ where: { id }, select: teamShape });
+    });
+    return res.json({ team: updatedTeam });
+  },
+);
 
 // Remove one leader (demote to plain member). Leaders lead only their own team,
 // so this always returns them to VOLUNTEER; they stay a member of the team.
-router.delete("/:id/leaders/:userId", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
-  const id = idParam(req.params.id);
-  const userId = idParam(req.params.userId);
-  if (id === null || userId === null) return res.status(400).json({ message: "Invalid id" });
+router.delete(
+  "/:id/leaders/:userId",
+  requireAuth,
+  requireRole("PRESIDENT"),
+  async (req: AuthRequest, res) => {
+    const id = idParam(req.params.id);
+    const userId = idParam(req.params.userId);
+    if (id === null || userId === null) return res.status(400).json({ message: "Invalid id" });
 
-  const team = await prisma.team.findUnique({
-    where: { id },
-    include: { club: { select: { presidentId: true } } },
-  });
-  if (!team) return res.status(404).json({ message: "Team not found" });
-  if (team.club.presidentId !== req.user!.userId) {
-    return res.status(403).json({ message: "You can only manage your own club's teams" });
-  }
+    const team = await prisma.team.findUnique({
+      where: { id },
+      include: { club: { select: { presidentId: true } } },
+    });
+    if (!team) return res.status(404).json({ message: "Team not found" });
+    if (team.club.presidentId !== req.user!.userId) {
+      return res.status(403).json({ message: "You can only manage your own club's teams" });
+    }
 
-  const member = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { teamId: true, teamRole: true },
-  });
-  if (!member || member.teamId !== id || member.teamRole === null) {
-    return res.status(404).json({ message: "That user is not a leader of this team" });
-  }
+    const member = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { teamId: true, teamRole: true },
+    });
+    if (!member || member.teamId !== id || member.teamRole === null) {
+      return res.status(404).json({ message: "That user is not a leader of this team" });
+    }
 
-  const updatedTeam = await prisma.$transaction(async (tx) => {
-    await tx.user.update({ where: { id: userId }, data: { role: Role.VOLUNTEER, teamRole: null } });
-    return tx.team.findUnique({ where: { id }, select: teamShape });
-  });
-  return res.json({ team: updatedTeam });
-});
+    const updatedTeam = await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: userId },
+        data: { role: Role.VOLUNTEER, teamRole: null },
+      });
+      return tx.team.findUnique({ where: { id }, select: teamShape });
+    });
+    return res.json({ team: updatedTeam });
+  },
+);
 
 router.delete("/:id", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
   const id = idParam(req.params.id);
@@ -192,40 +208,45 @@ router.delete("/:id", requireAuth, requireRole("PRESIDENT"), async (req: AuthReq
   return res.json({ message: "Team deleted" });
 });
 
-router.delete("/:id/members/:userId", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
-  const id = idParam(req.params.id);
-  const userId = idParam(req.params.userId);
-  if (id === null || userId === null) {
-    return res.status(400).json({ message: "Invalid id" });
-  }
+router.delete(
+  "/:id/members/:userId",
+  requireAuth,
+  requireRole("PRESIDENT"),
+  async (req: AuthRequest, res) => {
+    const id = idParam(req.params.id);
+    const userId = idParam(req.params.userId);
+    if (id === null || userId === null) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
 
-  const team = await prisma.team.findUnique({
-    where: { id },
-    include: { club: { select: { presidentId: true } } },
-  });
-  if (!team) return res.status(404).json({ message: "Team not found" });
+    const team = await prisma.team.findUnique({
+      where: { id },
+      include: { club: { select: { presidentId: true } } },
+    });
+    if (!team) return res.status(404).json({ message: "Team not found" });
 
-  if (team.club.presidentId !== req.user!.userId) {
-    return res.status(403).json({ message: "You can only manage your own club's teams" });
-  }
+    if (team.club.presidentId !== req.user!.userId) {
+      return res.status(403).json({ message: "You can only manage your own club's teams" });
+    }
 
-  const member = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { teamId: true, teamRole: true },
-  });
-  if (!member || member.teamId !== id) {
-    return res.status(404).json({ message: "That user is not a member of this team" });
-  }
+    const member = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { teamId: true, teamRole: true },
+    });
+    if (!member || member.teamId !== id) {
+      return res.status(404).json({ message: "That user is not a member of this team" });
+    }
 
-  // Leaving the team clears membership and any leadership; a leader also drops
-  // back to VOLUNTEER.
-  await prisma.user.update({
-    where: { id: userId },
-    data: { teamId: null, teamRole: null, ...(member.teamRole ? { role: Role.VOLUNTEER } : {}) },
-  });
+    // Leaving the team clears membership and any leadership; a leader also drops
+    // back to VOLUNTEER.
+    await prisma.user.update({
+      where: { id: userId },
+      data: { teamId: null, teamRole: null, ...(member.teamRole ? { role: Role.VOLUNTEER } : {}) },
+    });
 
-  const updated = await prisma.team.findUnique({ where: { id }, select: teamShape });
-  return res.json({ team: updated });
-});
+    const updated = await prisma.team.findUnique({ where: { id }, select: teamShape });
+    return res.json({ team: updated });
+  },
+);
 
 export default router;

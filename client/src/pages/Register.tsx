@@ -57,7 +57,9 @@ export default function Register() {
       <div className="w-full max-w-sm animate-rise-in">
         <div className="mb-6 flex flex-col items-center text-center">
           <img src="/jhc-logo.png" alt="Jai Hind College" className="h-20 w-auto" />
-          <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">Create your account</h1>
+          <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">
+            Create your account
+          </h1>
           <p className="mt-1 text-sm text-slate-500">You'll be registered as a volunteer.</p>
         </div>
 

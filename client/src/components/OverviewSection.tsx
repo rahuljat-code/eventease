@@ -27,7 +27,9 @@ const ICON: Record<MetricTone, ReactNode> = {
       <path d="M8.5 12.5l2.5 2.5 4.5-5" />
     </>
   ),
-  blue: <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.6a1 1 0 0 1 .7.3l5.4 5.4a1 1 0 0 1 .3.7V19a2 2 0 0 1-2 2z" />,
+  blue: (
+    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.6a1 1 0 0 1 .7.3l5.4 5.4a1 1 0 0 1 .3.7V19a2 2 0 0 1-2 2z" />
+  ),
   violet: (
     <>
       <rect x="3" y="5" width="18" height="16" rx="2" />
@@ -64,7 +66,10 @@ export function OverviewSection() {
     return (
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-[84px] animate-pulse rounded-2xl border border-slate-200/70 bg-slate-100/60" />
+          <div
+            key={i}
+            className="h-[84px] animate-pulse rounded-2xl border border-slate-200/70 bg-slate-100/60"
+          />
         ))}
       </div>
     );
@@ -82,7 +87,13 @@ export function OverviewSection() {
 
       {data.charts.length > 0 && (
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          {data.charts.map((c) => (c.kind === "donut" ? <DonutChart key={c.title} chart={c} /> : <BarChart key={c.title} chart={c} />))}
+          {data.charts.map((c) =>
+            c.kind === "donut" ? (
+              <DonutChart key={c.title} chart={c} />
+            ) : (
+              <BarChart key={c.title} chart={c} />
+            ),
+          )}
         </div>
       )}
     </section>
@@ -94,8 +105,12 @@ function StatCard({ metric }: { metric: OverviewMetric }) {
   return (
     <div className="flex items-start justify-between rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06]">
       <div className="min-w-0">
-        <p className="truncate text-xs font-medium uppercase tracking-wide text-slate-500">{metric.label}</p>
-        <p className="mt-1 text-3xl font-bold tracking-tight tabular-nums text-slate-900">{metric.value}</p>
+        <p className="truncate text-xs font-medium uppercase tracking-wide text-slate-500">
+          {metric.label}
+        </p>
+        <p className="mt-1 text-3xl font-bold tracking-tight tabular-nums text-slate-900">
+          {metric.value}
+        </p>
         {metric.hint && <p className="mt-0.5 truncate text-xs text-slate-400">{metric.hint}</p>}
       </div>
       <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${t.bg} ${t.ink}`}>
@@ -139,18 +154,26 @@ function DonutChart({ chart }: { chart: OverviewChart }) {
       ) : (
         <div className="mt-4 flex items-center gap-5">
           <div className="relative h-28 w-28 shrink-0">
-            <div className="h-full w-full rounded-full" style={{ background: `conic-gradient(${stops})` }} />
+            <div
+              className="h-full w-full rounded-full"
+              style={{ background: `conic-gradient(${stops})` }}
+            />
             <div className="absolute inset-[24%] grid place-items-center rounded-full bg-white">
               <div className="text-center leading-none">
                 <div className="text-xl font-bold tabular-nums text-slate-900">{total}</div>
-                <div className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-400">total</div>
+                <div className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                  total
+                </div>
               </div>
             </div>
           </div>
           <ul className="flex-1 space-y-2">
             {chart.series.map((s) => (
               <li key={s.label} className="flex items-center gap-2.5 text-sm">
-                <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: TONE[s.tone ?? "indigo"].solid }} />
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: TONE[s.tone ?? "indigo"].solid }}
+                />
                 <span className="flex-1 truncate text-slate-600">{s.label}</span>
                 <span className="font-semibold tabular-nums text-slate-900">{s.value}</span>
               </li>
@@ -177,15 +200,23 @@ function BarChart({ chart }: { chart: OverviewChart }) {
           {chart.series.map((s) => {
             const pct = s.value === 0 ? 0 : Math.max(6, Math.round((s.value / max) * 100));
             return (
-              <div key={s.label} className="flex items-center gap-3" title={`${s.label}: ${s.value}`}>
-                <span className="w-24 shrink-0 truncate text-sm text-slate-600 sm:w-32">{s.label}</span>
+              <div
+                key={s.label}
+                className="flex items-center gap-3"
+                title={`${s.label}: ${s.value}`}
+              >
+                <span className="w-24 shrink-0 truncate text-sm text-slate-600 sm:w-32">
+                  {s.label}
+                </span>
                 <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
                   <div
                     className="h-full rounded-full transition-[width] duration-500"
                     style={{ width: `${pct}%`, backgroundColor: TONE[s.tone ?? "indigo"].solid }}
                   />
                 </div>
-                <span className="w-7 shrink-0 text-right text-sm font-semibold tabular-nums text-slate-900">{s.value}</span>
+                <span className="w-7 shrink-0 text-right text-sm font-semibold tabular-nums text-slate-900">
+                  {s.value}
+                </span>
               </div>
             );
           })}

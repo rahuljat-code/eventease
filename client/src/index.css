@@ -22,8 +22,11 @@
     @apply text-slate-800;
     background-color: #f6f7fb;
     /* soft brand-tinted backdrop instead of a flat grey */
-    background-image:
-      radial-gradient(1200px 600px at 100% -10%, rgb(37 99 235 / 0.10), transparent 60%),
+    background-image: radial-gradient(
+        1200px 600px at 100% -10%,
+        rgb(37 99 235 / 0.1),
+        transparent 60%
+      ),
       radial-gradient(1000px 520px at -10% 8%, rgb(245 197 66 / 0.12), transparent 55%);
     background-attachment: fixed;
   }

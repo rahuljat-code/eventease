@@ -44,7 +44,10 @@ export function TeamHeadDashboard() {
           {teams.map((team) => {
             const count = team._count?.members ?? 0;
             return (
-              <div key={team.id} className="rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06]">
+              <div
+                key={team.id}
+                className="rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06]"
+              >
                 <div className="border-b border-slate-100 p-4">
                   <p className="font-medium text-slate-900">{team.name}</p>
                   <p className="mt-0.5 text-sm text-slate-500">

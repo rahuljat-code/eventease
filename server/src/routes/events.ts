@@ -49,7 +49,10 @@ router.get("/", requireAuth, requireRole("PRESIDENT", "ADMIN"), async (req: Auth
     select: { ...eventShape, _count: { select: { registrations: true } } },
     orderBy: { eventDate: "asc" },
   });
-  const shaped = events.map(({ _count, ...e }) => ({ ...e, registrationCount: _count.registrations }));
+  const shaped = events.map(({ _count, ...e }) => ({
+    ...e,
+    registrationCount: _count.registrations,
+  }));
   return res.json({ events: shaped });
 });
 
@@ -86,55 +89,80 @@ router.get("/browse", requireAuth, requireRole("VOLUNTEER"), async (req: AuthReq
 });
 
 // Volunteer: register for an event (idempotent).
-router.post("/:id/register", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequest, res) => {
-  const id = idParam(req.params.id);
-  if (id === null) return res.status(400).json({ message: "Invalid event id" });
-  const event = await prisma.event.findUnique({ where: { id }, select: { status: true } });
-  if (!event) return res.status(404).json({ message: "Event not found" });
-  if (event.status === "COMPLETED") {
-    return res.status(400).json({ message: "This event has already ended" });
-  }
-  await prisma.eventRegistration.upsert({
-    where: { eventId_userId: { eventId: id, userId: req.user!.userId } },
-    create: { eventId: id, userId: req.user!.userId },
-    update: {},
-  });
-  return res.json({ message: "Registered" });
-});
+router.post(
+  "/:id/register",
+  requireAuth,
+  requireRole("VOLUNTEER"),
+  async (req: AuthRequest, res) => {
+    const id = idParam(req.params.id);
+    if (id === null) return res.status(400).json({ message: "Invalid event id" });
+    const event = await prisma.event.findUnique({ where: { id }, select: { status: true } });
+    if (!event) return res.status(404).json({ message: "Event not found" });
+    if (event.status === "COMPLETED") {
+      return res.status(400).json({ message: "This event has already ended" });
+    }
+    await prisma.eventRegistration.upsert({
+      where: { eventId_userId: { eventId: id, userId: req.user!.userId } },
+      create: { eventId: id, userId: req.user!.userId },
+      update: {},
+    });
+    return res.json({ message: "Registered" });
+  },
+);
 
 // Volunteer: cancel a registration.
-router.delete("/:id/register", requireAuth, requireRole("VOLUNTEER"), async (req: AuthRequest, res) => {
-  const id = idParam(req.params.id);
-  if (id === null) return res.status(400).json({ message: "Invalid event id" });
-  await prisma.eventRegistration.deleteMany({ where: { eventId: id, userId: req.user!.userId } });
-  return res.json({ message: "Registration cancelled" });
-});
+router.delete(
+  "/:id/register",
+  requireAuth,
+  requireRole("VOLUNTEER"),
+  async (req: AuthRequest, res) => {
+    const id = idParam(req.params.id);
+    if (id === null) return res.status(400).json({ message: "Invalid event id" });
+    await prisma.eventRegistration.deleteMany({ where: { eventId: id, userId: req.user!.userId } });
+    return res.json({ message: "Registration cancelled" });
+  },
+);
 
 // President (own club) / Admin: the list of volunteers registered for an event.
-router.get("/:id/registrations", requireAuth, requireRole("PRESIDENT", "ADMIN"), async (req: AuthRequest, res) => {
-  const id = idParam(req.params.id);
-  if (id === null) return res.status(400).json({ message: "Invalid event id" });
-  const event = await prisma.event.findUnique({
-    where: { id },
-    include: { club: { select: { presidentId: true } } },
-  });
-  if (!event) return res.status(404).json({ message: "Event not found" });
-  if (req.user!.role === "PRESIDENT" && event.club.presidentId !== req.user!.userId) {
-    return res.status(403).json({ message: "You can only view registrations for your own club's events" });
-  }
-  const regs = await prisma.eventRegistration.findMany({
-    where: { eventId: id },
-    select: {
-      id: true,
-      createdAt: true,
-      user: { select: { id: true, name: true, rollNo: true, uid: true, class: { select: { name: true } } } },
-    },
-    orderBy: { createdAt: "asc" },
-  });
-  return res.json({
-    registrations: regs.map((r) => ({ registeredAt: r.createdAt, ...r.user })),
-  });
-});
+router.get(
+  "/:id/registrations",
+  requireAuth,
+  requireRole("PRESIDENT", "ADMIN"),
+  async (req: AuthRequest, res) => {
+    const id = idParam(req.params.id);
+    if (id === null) return res.status(400).json({ message: "Invalid event id" });
+    const event = await prisma.event.findUnique({
+      where: { id },
+      include: { club: { select: { presidentId: true } } },
+    });
+    if (!event) return res.status(404).json({ message: "Event not found" });
+    if (req.user!.role === "PRESIDENT" && event.club.presidentId !== req.user!.userId) {
+      return res
+        .status(403)
+        .json({ message: "You can only view registrations for your own club's events" });
+    }
+    const regs = await prisma.eventRegistration.findMany({
+      where: { eventId: id },
+      select: {
+        id: true,
+        createdAt: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            rollNo: true,
+            uid: true,
+            class: { select: { name: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+    return res.json({
+      registrations: regs.map((r) => ({ registeredAt: r.createdAt, ...r.user })),
+    });
+  },
+);
 
 router.post("/", requireAuth, requireRole("PRESIDENT"), async (req: AuthRequest, res) => {
   const parsed = createSchema.safeParse(req.body);

@@ -1,4 +1,3 @@
-
 export type Role = "VOLUNTEER" | "TEAM_HEAD" | "PRESIDENT" | "FACULTY" | "ADMIN";
 
 // A class as the register dropdown and the profile need it — just id + name.
@@ -98,11 +97,7 @@ export type EventStatus = "UPCOMING" | "ONGOING" | "COMPLETED";
 
 /* ----- Module 4: Attendance requests ----- */
 
-export type RequestStatus =
-  | "PENDING_TEAM_HEAD"
-  | "PENDING_PRESIDENT"
-  | "APPROVED"
-  | "REJECTED";
+export type RequestStatus = "PENDING_TEAM_HEAD" | "PENDING_PRESIDENT" | "APPROVED" | "REJECTED";
 
 export interface AttendanceRequest {
   id: number;
@@ -146,7 +141,13 @@ export interface CreditAward {
 export interface CreditTeamContext {
   events: { id: number; name: string; eventDate: string }[];
   members: { id: number; name: string; rollNo?: string | null; class?: { name: string } | null }[];
-  awards: { id: number; volunteerId: number; eventId: number; points: number; verifiedAt: string | null }[];
+  awards: {
+    id: number;
+    volunteerId: number;
+    eventId: number;
+    points: number;
+    verifiedAt: string | null;
+  }[];
 }
 
 // A volunteer's own credit, on their dashboard.

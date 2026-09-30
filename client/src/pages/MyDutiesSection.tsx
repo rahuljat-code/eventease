@@ -57,10 +57,14 @@ export function MyDutiesSection() {
                 className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06]"
               >
                 <div className="min-w-0">
-                  <p className={`font-medium ${done ? "text-slate-400 line-through" : "text-slate-900"}`}>
+                  <p
+                    className={`font-medium ${done ? "text-slate-400 line-through" : "text-slate-900"}`}
+                  >
                     {d.title}
                   </p>
-                  {d.description && <p className="mt-0.5 text-sm text-slate-500">{d.description}</p>}
+                  {d.description && (
+                    <p className="mt-0.5 text-sm text-slate-500">{d.description}</p>
+                  )}
                   {d.event && (
                     <p className="mt-1 text-xs text-slate-400">For event: {d.event.name}</p>
                   )}

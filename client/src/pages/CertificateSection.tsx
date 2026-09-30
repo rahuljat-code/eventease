@@ -3,7 +3,11 @@ import { api } from "../lib/api";
 import type { CertificateData } from "../lib/types";
 
 function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  return new Date(iso).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 export function CertificateSection() {
@@ -52,14 +56,18 @@ export function CertificateSection() {
         <p className="mt-6 text-sm text-slate-500">This is to certify that</p>
         <p className="mt-2 text-2xl font-semibold text-slate-900">{data.student.name}</p>
         <p className="mt-1 text-sm text-slate-500">
-          {[data.student.class, data.student.rollNo && `Roll No. ${data.student.rollNo}`, data.student.uid]
+          {[
+            data.student.class,
+            data.student.rollNo && `Roll No. ${data.student.rollNo}`,
+            data.student.uid,
+          ]
             .filter(Boolean)
             .join(" · ")}
         </p>
         <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-slate-600">
-          has actively participated in the co-curricular activities and events listed below, earning a total
-          of <span className="font-semibold text-[#1e3a8a]">{data.totalCC} CC points</span> through the
-          EventEase participation and credit system.
+          has actively participated in the co-curricular activities and events listed below, earning
+          a total of <span className="font-semibold text-[#1e3a8a]">{data.totalCC} CC points</span>{" "}
+          through the EventEase participation and credit system.
         </p>
 
         {lines.length > 0 && (
@@ -70,14 +78,18 @@ export function CertificateSection() {
                   <tr key={i}>
                     <td className="py-2 text-slate-700">{l.name}</td>
                     <td className="py-2 text-right text-slate-400">{l.kind}</td>
-                    <td className="py-2 pl-4 text-right font-medium text-slate-700">{l.points} pts</td>
+                    <td className="py-2 pl-4 text-right font-medium text-slate-700">
+                      {l.points} pts
+                    </td>
                   </tr>
                 ))}
                 <tr className="border-t-2 border-slate-200">
                   <td className="py-2 font-semibold text-slate-900" colSpan={2}>
                     Total CC Points
                   </td>
-                  <td className="py-2 pl-4 text-right font-bold text-[#1e3a8a]">{data.totalCC} pts</td>
+                  <td className="py-2 pl-4 text-right font-bold text-[#1e3a8a]">
+                    {data.totalCC} pts
+                  </td>
                 </tr>
               </tbody>
             </table>

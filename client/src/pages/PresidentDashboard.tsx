@@ -97,7 +97,9 @@ export function PresidentDashboard() {
                   {ev.venue ? ` · ${ev.venue}` : ""}
                   {ev.club ? ` · ${ev.club.name}` : ""}
                 </p>
-                <p className="mt-0.5 text-xs text-slate-400">{ev.registrationCount ?? 0} registered</p>
+                <p className="mt-0.5 text-xs text-slate-400">
+                  {ev.registrationCount ?? 0} registered
+                </p>
               </div>
               <div className="flex items-center gap-3">
                 <select
@@ -215,7 +217,7 @@ function EventModal({
       onDone();
       onClose();
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     }
   }
 
@@ -283,7 +285,11 @@ function RegistrationsModal({ event, onClose }: { event: EventItem | null; onClo
   }, [event]);
 
   return (
-    <Modal open={event !== null} onClose={onClose} title={event ? `Registrations — ${event.name}` : ""}>
+    <Modal
+      open={event !== null}
+      onClose={onClose}
+      title={event ? `Registrations — ${event.name}` : ""}
+    >
       {loading ? (
         <p className="text-sm text-slate-500">Loading…</p>
       ) : regs.length === 0 ? (

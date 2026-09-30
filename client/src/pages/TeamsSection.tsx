@@ -86,7 +86,10 @@ export function TeamsSection() {
                     .join(", ")
                 : "No leaders yet";
             return (
-              <div key={team.id} className="rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06]">
+              <div
+                key={team.id}
+                className="rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06]"
+              >
                 <div className="flex items-center justify-between p-4">
                   <div>
                     <p className="font-medium text-slate-900">{team.name}</p>
@@ -188,7 +191,7 @@ function CreateTeamModal({
       onDone();
       onClose();
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     }
   }
 
@@ -257,7 +260,7 @@ function ManageLeadersModal({
       setUserId("");
       onDone();
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     } finally {
       setBusy(false);
     }
@@ -271,7 +274,7 @@ function ManageLeadersModal({
       setTeamState(res.data.team);
       onDone();
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     }
   }
 
@@ -306,7 +309,11 @@ function ManageLeadersModal({
         <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
           <label className="block text-sm font-medium text-slate-700">Add a leader</label>
           <SearchSelect
-            options={users.map((u) => ({ id: u.id, label: u.name, sub: `${u.email.split("@")[0]} · ${u.role}` }))}
+            options={users.map((u) => ({
+              id: u.id,
+              label: u.name,
+              sub: `${u.email.split("@")[0]} · ${u.role}`,
+            }))}
             value={userId ? Number(userId) : ""}
             onChange={(id) => setUserId(String(id))}
             placeholder="Search for a student…"

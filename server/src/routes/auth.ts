@@ -7,7 +7,6 @@ import { requireAuth, requireRole, AuthRequest } from "../middleware/auth";
 
 const router = Router();
 
-
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.email("Please enter a valid email"),
@@ -34,11 +33,9 @@ const publicUser = {
 } as const;
 
 function signToken(userId: number, role: string) {
-  return jwt.sign(
-    { userId, role }, 
-    process.env.JWT_SECRET as string, 
-    { expiresIn: (process.env.JWT_EXPIRES_IN || "7d") as jwt.SignOptions["expiresIn"] }
-  );
+  return jwt.sign({ userId, role }, process.env.JWT_SECRET as string, {
+    expiresIn: (process.env.JWT_EXPIRES_IN || "7d") as jwt.SignOptions["expiresIn"],
+  });
 }
 
 router.post("/register", async (req, res) => {
@@ -62,21 +59,21 @@ router.post("/register", async (req, res) => {
   }
 
   if (await prisma.user.findUnique({ where: { classId_rollNo: { classId, rollNo } } })) {
-    return res.status(409).json({ message: "That roll number is already registered in this class" });
+    return res
+      .status(409)
+      .json({ message: "That roll number is already registered in this class" });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
 
   try {
     const user = await prisma.user.create({
-
       data: { name, email, passwordHash, rollNo, uid, classId },
       select: publicUser,
     });
     const token = signToken(user.id, user.role);
     return res.status(201).json({ user, token });
   } catch (err) {
-
     if ((err as { code?: string }).code === "P2002") {
       return res.status(409).json({ message: "An account with these details already exists" });
     }
@@ -139,7 +136,9 @@ router.post("/change-password", requireAuth, async (req: AuthRequest, res) => {
   if (!ok) return res.status(401).json({ message: "Your current password is incorrect" });
 
   if (currentPassword === newPassword) {
-    return res.status(400).json({ message: "The new password must be different from your current one" });
+    return res
+      .status(400)
+      .json({ message: "The new password must be different from your current one" });
   }
 
   await prisma.user.update({

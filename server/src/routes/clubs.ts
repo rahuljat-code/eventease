@@ -29,12 +29,10 @@ function idParam(raw: string): number | null {
   return Number.isInteger(n) && n > 0 ? n : null;
 }
 
-
 router.get("/", requireAuth, requireRole("ADMIN"), async (_req, res) => {
   const clubs = await prisma.club.findMany({ select: clubShape, orderBy: { name: "asc" } });
   return res.json({ clubs });
 });
-
 
 router.get("/browse", requireAuth, async (_req, res) => {
   const clubs = await prisma.club.findMany({

@@ -64,7 +64,8 @@ function extractStudents(text: string): { students: ParsedStudent[]; error?: str
   if (rollIdx === -1 || uidIdx === -1 || nameIdx === -1) {
     return {
       students: [],
-      error: "Couldn't find the Roll No, UID and Name columns. The first row must name them as headers.",
+      error:
+        "Couldn't find the Roll No, UID and Name columns. The first row must name them as headers.",
     };
   }
 
@@ -78,7 +79,10 @@ function extractStudents(text: string): { students: ParsedStudent[]; error?: str
     .filter((s) => s.uid && s.name && s.rollNo);
 
   if (students.length === 0)
-    return { students: [], error: "No valid rows found — each student needs a roll no, UID and name." };
+    return {
+      students: [],
+      error: "No valid rows found — each student needs a roll no, UID and name.",
+    };
   return { students };
 }
 
@@ -142,7 +146,7 @@ export function StudentImportSection() {
       setNewCourse("");
       setNewYear("");
     } catch (err) {
-      setClassError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setClassError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     } finally {
       setClassBusy(false);
     }
@@ -160,7 +164,11 @@ export function StudentImportSection() {
       setFileName("");
       if (fileRef.current) fileRef.current.value = "";
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Upload failed" : "Upload failed");
+      setError(
+        axios.isAxiosError(err)
+          ? (err.response?.data?.message ?? "Upload failed")
+          : "Upload failed",
+      );
     } finally {
       setBusy(false);
     }
@@ -170,11 +178,13 @@ export function StudentImportSection() {
     <div>
       <h2 className="mb-1 text-lg font-semibold text-slate-900">Import Students</h2>
       <p className="mb-5 text-sm text-slate-500">
-        Upload a class list as a <span className="font-medium text-slate-700">CSV</span> file (in Excel:
-        File → Save As → CSV). The first row must have <span className="font-medium text-slate-700">Roll
-        No</span>, <span className="font-medium text-slate-700">UID</span> and{" "}
-        <span className="font-medium text-slate-700">Name</span> columns. Each student can then sign in with
-        their UID and the password <span className="font-mono text-slate-700">student123</span>.
+        Upload a class list as a <span className="font-medium text-slate-700">CSV</span> file (in
+        Excel: File → Save As → CSV). The first row must have{" "}
+        <span className="font-medium text-slate-700">Roll No</span>,{" "}
+        <span className="font-medium text-slate-700">UID</span> and{" "}
+        <span className="font-medium text-slate-700">Name</span> columns. Each student can then sign
+        in with their UID and the password{" "}
+        <span className="font-mono text-slate-700">student123</span>.
       </p>
 
       <div className="card space-y-4 p-5">
@@ -292,12 +302,19 @@ export function StudentImportSection() {
           <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
             Imported <span className="font-semibold">{result.created}</span> new student
             {result.created === 1 ? "" : "s"}.
-            {result.skipped > 0 && ` ${result.skipped} already existed and ${result.skipped === 1 ? "was" : "were"} skipped.`}
+            {result.skipped > 0 &&
+              ` ${result.skipped} already existed and ${result.skipped === 1 ? "was" : "were"} skipped.`}
           </p>
         )}
 
-        <button onClick={upload} disabled={busy || !classId || students.length === 0} className="btn-primary">
-          {busy ? "Importing…" : `Import ${students.length || ""} student${students.length === 1 ? "" : "s"}`}
+        <button
+          onClick={upload}
+          disabled={busy || !classId || students.length === 0}
+          className="btn-primary"
+        >
+          {busy
+            ? "Importing…"
+            : `Import ${students.length || ""} student${students.length === 1 ? "" : "s"}`}
         </button>
       </div>
     </div>

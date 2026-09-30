@@ -12,7 +12,9 @@ const BADGE_STYLE: Record<Exclude<Badge, null>, string> = {
 function BadgeChip({ badge }: { badge: Badge }) {
   if (!badge) return <span className="text-slate-300">—</span>;
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${BADGE_STYLE[badge]}`}>
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${BADGE_STYLE[badge]}`}
+    >
       {badge}
     </span>
   );
@@ -77,7 +79,9 @@ export function LeaderboardSection() {
                     <td className="px-4 py-3 font-semibold text-slate-500">#{r.rank}</td>
                     <td className="px-4 py-3 font-medium text-slate-900">
                       {r.name}
-                      {mine && <span className="ml-2 text-xs font-normal text-indigo-500">(you)</span>}
+                      {mine && (
+                        <span className="ml-2 text-xs font-normal text-indigo-500">(you)</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-slate-500">{r.class ?? "—"}</td>
                     <td className="px-4 py-3 text-right font-medium text-slate-700">{r.points}</td>

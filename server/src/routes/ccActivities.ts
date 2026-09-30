@@ -31,7 +31,13 @@ router.post("/", requireAuth, requireRole("FACULTY", "ADMIN"), async (req: AuthR
 
   const activity = await prisma.cCActivity.create({
     data: { title, points, activityDate, classId, createdById: req.user!.userId },
-    select: { id: true, title: true, activityDate: true, points: true, class: { select: { id: true, name: true } } },
+    select: {
+      id: true,
+      title: true,
+      activityDate: true,
+      points: true,
+      class: { select: { id: true, name: true } },
+    },
   });
   return res.status(201).json({ activity });
 });
@@ -39,7 +45,14 @@ router.post("/", requireAuth, requireRole("FACULTY", "ADMIN"), async (req: AuthR
 router.get("/", requireAuth, requireRole("FACULTY", "ADMIN"), async (_req, res) => {
   const activities = await prisma.cCActivity.findMany({
     orderBy: { activityDate: "desc" },
-    select: { id: true, title: true, activityDate: true, points: true, classId: true, class: { select: { name: true } } },
+    select: {
+      id: true,
+      title: true,
+      activityDate: true,
+      points: true,
+      classId: true,
+      class: { select: { name: true } },
+    },
   });
   const ids = activities.map((a) => a.id);
   const classIds = [...new Set(activities.map((a) => a.classId))];
@@ -50,7 +63,11 @@ router.get("/", requireAuth, requireRole("FACULTY", "ADMIN"), async (_req, res) 
       where: { activityId: { in: ids }, present: true },
       _count: { _all: true },
     }),
-    prisma.user.groupBy({ by: ["classId"], where: { classId: { in: classIds } }, _count: { _all: true } }),
+    prisma.user.groupBy({
+      by: ["classId"],
+      where: { classId: { in: classIds } },
+      _count: { _all: true },
+    }),
   ]);
   const presentMap = new Map(present.map((p) => [p.activityId, p._count._all]));
   const studentMap = new Map(students.map((s) => [s.classId, s._count._all]));
@@ -74,7 +91,14 @@ router.get("/:id", requireAuth, requireRole("FACULTY", "ADMIN"), async (req, res
 
   const activity = await prisma.cCActivity.findUnique({
     where: { id },
-    select: { id: true, title: true, activityDate: true, points: true, classId: true, class: { select: { id: true, name: true } } },
+    select: {
+      id: true,
+      title: true,
+      activityDate: true,
+      points: true,
+      classId: true,
+      class: { select: { id: true, name: true } },
+    },
   });
   if (!activity) return res.status(404).json({ message: "Activity not found" });
 
@@ -92,7 +116,8 @@ router.get("/:id", requireAuth, requireRole("FACULTY", "ADMIN"), async (req, res
 
   const roster = students
     .sort((a, b) => {
-      const na = Number(a.rollNo), nb = Number(b.rollNo);
+      const na = Number(a.rollNo),
+        nb = Number(b.rollNo);
       if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
       return (a.rollNo ?? "").localeCompare(b.rollNo ?? "");
     })
@@ -111,7 +136,10 @@ router.patch("/:id/attendance", requireAuth, requireRole("FACULTY", "ADMIN"), as
   if (!activity) return res.status(404).json({ message: "Activity not found" });
 
   // Only students of this activity's class can be marked.
-  const students = await prisma.user.findMany({ where: { classId: activity.classId }, select: { id: true } });
+  const students = await prisma.user.findMany({
+    where: { classId: activity.classId },
+    select: { id: true },
+  });
   const presentSet = new Set(parsed.data.presentStudentIds);
 
   await prisma.$transaction(
@@ -120,10 +148,13 @@ router.patch("/:id/attendance", requireAuth, requireRole("FACULTY", "ADMIN"), as
         where: { activityId_studentId: { activityId: id, studentId: s.id } },
         create: { activityId: id, studentId: s.id, present: presentSet.has(s.id) },
         update: { present: presentSet.has(s.id) },
-      })
-    )
+      }),
+    ),
   );
-  return res.json({ message: "Attendance saved", presentCount: [...presentSet].filter((sid) => students.some((s) => s.id === sid)).length });
+  return res.json({
+    message: "Attendance saved",
+    presentCount: [...presentSet].filter((sid) => students.some((s) => s.id === sid)).length,
+  });
 });
 
 router.delete("/:id", requireAuth, requireRole("FACULTY", "ADMIN"), async (req, res) => {

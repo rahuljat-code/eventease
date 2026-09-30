@@ -3,7 +3,6 @@ import axios from "axios";
 import { api } from "../lib/api";
 import type { CreditAward } from "../lib/types";
 
-
 export function CreditVerifySection() {
   const [awards, setAwards] = useState<CreditAward[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,13 +30,14 @@ export function CreditVerifySection() {
       await api.patch(`/credits/${a.id}/verify`);
       await load();
     } catch (err) {
-      alert(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      alert(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     } finally {
       setBusy(null);
     }
   }
   async function remove(a: CreditAward) {
-    if (!confirm(`Remove ${a.points} points awarded to ${a.volunteer.name} for ${a.event.name}?`)) return;
+    if (!confirm(`Remove ${a.points} points awarded to ${a.volunteer.name} for ${a.event.name}?`))
+      return;
     setBusy(a.id);
     try {
       await api.delete(`/credits/${a.id}`);
@@ -70,7 +70,9 @@ export function CreditVerifySection() {
         <p className="text-sm text-slate-500">Loading…</p>
       ) : awards.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
-          {tab === "history" ? "You have not verified any credits yet." : "No CC points waiting for verification."}
+          {tab === "history"
+            ? "You have not verified any credits yet."
+            : "No CC points waiting for verification."}
         </p>
       ) : (
         <div className="space-y-3">
@@ -82,11 +84,16 @@ export function CreditVerifySection() {
               <div>
                 <p className="font-medium text-slate-900">
                   {a.volunteer.name}
-                  {a.volunteer.rollNo && <span className="text-slate-400"> · {a.volunteer.rollNo}</span>}
-                  {a.volunteer.class && <span className="text-slate-400"> · {a.volunteer.class.name}</span>}
+                  {a.volunteer.rollNo && (
+                    <span className="text-slate-400"> · {a.volunteer.rollNo}</span>
+                  )}
+                  {a.volunteer.class && (
+                    <span className="text-slate-400"> · {a.volunteer.class.name}</span>
+                  )}
                 </p>
                 <p className="mt-0.5 text-sm text-slate-500">
-                  <span className="font-medium text-slate-700">{a.points} pts</span> for {a.event.name}
+                  <span className="font-medium text-slate-700">{a.points} pts</span> for{" "}
+                  {a.event.name}
                   {a.awardedBy && ` · awarded by ${a.awardedBy.name}`}
                 </p>
               </div>

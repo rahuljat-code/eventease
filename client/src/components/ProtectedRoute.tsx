@@ -3,13 +3,7 @@ import type { ReactNode } from "react";
 import type { Role } from "../lib/types";
 import { useAuth, dashboardPath } from "../context/AuthContext";
 
-export function ProtectedRoute({
-  children,
-  allow,
-}: {
-  children: ReactNode;
-  allow?: Role[];
-}) {
+export function ProtectedRoute({ children, allow }: { children: ReactNode; allow?: Role[] }) {
   const { user, loading } = useAuth();
 
   // Wait until we've asked the server who we are (avoids a flash of the login page)

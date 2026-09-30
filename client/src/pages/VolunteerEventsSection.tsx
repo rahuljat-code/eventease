@@ -73,7 +73,9 @@ export function VolunteerEventsSection() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="truncate font-medium text-slate-900">{e.name}</p>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_STYLE[e.status]}`}>
+                  <span
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_STYLE[e.status]}`}
+                  >
                     {e.status.toLowerCase()}
                   </span>
                 </div>
@@ -81,9 +83,7 @@ export function VolunteerEventsSection() {
                   {fmtDate(e.eventDate)}
                   {e.venue ? ` · ${e.venue}` : ""} · {e.club.name}
                 </p>
-                <p className="mt-0.5 text-xs text-slate-400">
-                  {e.registrationCount} registered
-                </p>
+                <p className="mt-0.5 text-xs text-slate-400">{e.registrationCount} registered</p>
               </div>
 
               {e.registered ? (
@@ -100,7 +100,11 @@ export function VolunteerEventsSection() {
                   </button>
                 </div>
               ) : (
-                <button onClick={() => toggle(e)} disabled={busy === e.id} className="btn-primary shrink-0">
+                <button
+                  onClick={() => toggle(e)}
+                  disabled={busy === e.id}
+                  className="btn-primary shrink-0"
+                >
                   {busy === e.id ? "…" : "Register"}
                 </button>
               )}

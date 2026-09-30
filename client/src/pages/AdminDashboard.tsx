@@ -74,53 +74,57 @@ export function AdminDashboard() {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       {loading ? (
-          <p className="text-sm text-slate-500">Loading…</p>
-        ) : clubs.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
-            No clubs yet. Create one to get started.
-          </p>
-        ) : (
-          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06]">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left text-slate-500">
-                <tr>
-                  <th className="px-4 py-2.5 font-medium">Club</th>
-                  <th className="px-4 py-2.5 font-medium">Category</th>
-                  <th className="px-4 py-2.5 font-medium">President</th>
-                  <th className="px-4 py-2.5 font-medium">Events</th>
-                  <th className="px-4 py-2.5" />
+        <p className="text-sm text-slate-500">Loading…</p>
+      ) : clubs.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+          No clubs yet. Create one to get started.
+        </p>
+      ) : (
+        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.03] transition duration-200 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/[0.06]">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 text-left text-slate-500">
+              <tr>
+                <th className="px-4 py-2.5 font-medium">Club</th>
+                <th className="px-4 py-2.5 font-medium">Category</th>
+                <th className="px-4 py-2.5 font-medium">President</th>
+                <th className="px-4 py-2.5 font-medium">Events</th>
+                <th className="px-4 py-2.5" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {clubs.map((club) => (
+                <tr key={club.id}>
+                  <td className="px-4 py-3 font-medium text-slate-900">{club.name}</td>
+                  <td className="px-4 py-3 text-slate-600">{club.category ?? "—"}</td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {club.president ? (
+                      club.president.name
+                    ) : (
+                      <span className="text-slate-400">Unassigned</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-slate-600">{club._count?.events ?? 0}</td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => setAssigning(club)}
+                      className="mr-3 text-sm font-medium text-indigo-600 hover:underline"
+                    >
+                      Assign president
+                    </button>
+                    <button
+                      onClick={() => deleteClub(club)}
+                      className="text-sm font-medium text-red-600 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {clubs.map((club) => (
-                  <tr key={club.id}>
-                    <td className="px-4 py-3 font-medium text-slate-900">{club.name}</td>
-                    <td className="px-4 py-3 text-slate-600">{club.category ?? "—"}</td>
-                    <td className="px-4 py-3 text-slate-600">
-                      {club.president ? club.president.name : <span className="text-slate-400">Unassigned</span>}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">{club._count?.events ?? 0}</td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => setAssigning(club)}
-                        className="mr-3 text-sm font-medium text-indigo-600 hover:underline"
-                      >
-                        Assign president
-                      </button>
-                      <button
-                        onClick={() => deleteClub(club)}
-                        className="text-sm font-medium text-red-600 hover:underline"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   );
 
   const teachersView = (
@@ -240,7 +244,7 @@ function AddTeacherModal({
       onDone();
       onClose();
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     }
   }
 
@@ -251,22 +255,52 @@ function AddTeacherModal({
     <Modal open={open} onClose={onClose} title="Add teacher">
       <form onSubmit={submit} className="space-y-4">
         <Labelled label="Full name">
-          <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Preeti Shelar" className={inputCls} />
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            placeholder="Preeti Shelar"
+            className={inputCls}
+          />
         </Labelled>
         <Labelled label="Username (used to sign in)">
-          <input value={username} onChange={(e) => setUsername(e.target.value)} required placeholder="preeti" className={inputCls} />
+          <input
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            placeholder="preeti"
+            className={inputCls}
+          />
         </Labelled>
         <Labelled label="Password">
-          <input value={password} onChange={(e) => setPassword(e.target.value)} required className={inputCls} />
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className={inputCls}
+          />
         </Labelled>
         <Labelled label="Department / Designation (optional)">
-          <input value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Dept. of IT · Assistant Professor" className={inputCls} />
+          <input
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
+            placeholder="Dept. of IT · Assistant Professor"
+            className={inputCls}
+          />
         </Labelled>
         <Labelled label="Phone number (optional)">
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="98XXXXXXXX" className={inputCls} />
+          <input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="98XXXXXXXX"
+            className={inputCls}
+          />
         </Labelled>
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button type="submit" className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700">
+        <button
+          type="submit"
+          className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+        >
           Add teacher
         </button>
       </form>
@@ -297,7 +331,7 @@ function CreateClubModal({
       onDone();
       onClose();
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     }
   }
 
@@ -356,7 +390,7 @@ function AssignPresidentModal({
       onDone();
       onClose();
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     }
   }
 
@@ -369,7 +403,7 @@ function AssignPresidentModal({
       onDone();
       onClose();
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     }
   }
 
@@ -381,14 +415,18 @@ function AssignPresidentModal({
           {club?.president && (
             <>
               {" "}
-              Current: <span className="font-medium text-slate-700">{club.president.name}</span> — picking
-              someone new replaces them.
+              Current: <span className="font-medium text-slate-700">{club.president.name}</span> —
+              picking someone new replaces them.
             </>
           )}
         </p>
         <Labelled label="User">
           <SearchSelect
-            options={users.map((u) => ({ id: u.id, label: u.name, sub: `${u.email.split("@")[0]} · ${u.role}` }))}
+            options={users.map((u) => ({
+              id: u.id,
+              label: u.name,
+              sub: `${u.email.split("@")[0]} · ${u.role}`,
+            }))}
             value={userId ? Number(userId) : ""}
             onChange={(id) => setUserId(String(id))}
             placeholder="Search for a student…"

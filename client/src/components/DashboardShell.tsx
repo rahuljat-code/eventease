@@ -130,7 +130,7 @@ export function DashboardShell({
   const [active, setActive] = useState(nav[0]?.id ?? "");
   const [changingPassword, setChangingPassword] = useState(false);
 
-  const roleLabel = user ? ROLE_LABEL[user.role] ?? user.role : "";
+  const roleLabel = user ? (ROLE_LABEL[user.role] ?? user.role) : "";
   const fullName = user?.name ?? "";
   const activeLabel = nav.find((n) => n.id === active)?.label;
 
@@ -241,7 +241,7 @@ export function DashboardShell({
               {greeting()}, {fullName}
             </h1>
             <p className="mt-1 text-sm text-slate-500">
-              {activeLabel ? `${activeLabel} · ${subtitle ?? roleLabel}` : subtitle ?? roleLabel}
+              {activeLabel ? `${activeLabel} · ${subtitle ?? roleLabel}` : (subtitle ?? roleLabel)}
             </p>
           </header>
 

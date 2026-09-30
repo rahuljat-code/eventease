@@ -3,7 +3,6 @@ import axios from "axios";
 import { api } from "../lib/api";
 import type { CreditTeamContext } from "../lib/types";
 
-
 export function AwardCreditsSection() {
   const [ctx, setCtx] = useState<CreditTeamContext>({ events: [], members: [], awards: [] });
   const [eventId, setEventId] = useState("");
@@ -41,7 +40,7 @@ export function AwardCreditsSection() {
         return n;
       });
     } catch (err) {
-      setMsg(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setMsg(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     } finally {
       setSavingId(null);
     }

@@ -31,7 +31,7 @@ export function SearchSelect({
     const s = q.trim().toLowerCase();
     const list = s
       ? options.filter(
-          (o) => o.label.toLowerCase().includes(s) || (o.sub?.toLowerCase().includes(s) ?? false)
+          (o) => o.label.toLowerCase().includes(s) || (o.sub?.toLowerCase().includes(s) ?? false),
         )
       : options;
     return list.slice(0, 60);
@@ -55,7 +55,13 @@ export function SearchSelect({
         <span className={`truncate ${selected ? "text-slate-900" : "text-slate-400"}`}>
           {selected ? selected.label : placeholder}
         </span>
-        <svg className="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <svg
+          className="h-4 w-4 shrink-0 text-slate-400"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        >
           <path d="M6 8l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>

@@ -39,7 +39,7 @@ export function ChangePasswordModal({ open, onClose }: { open: boolean; onClose:
       await api.post("/auth/change-password", { currentPassword: current, newPassword: next });
       setDone(true);
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     } finally {
       setBusy(false);
     }
@@ -65,16 +65,38 @@ export function ChangePasswordModal({ open, onClose }: { open: boolean; onClose:
       ) : (
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">Current password</label>
-            <input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} required className={inputCls} />
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">
+              Current password
+            </label>
+            <input
+              type="password"
+              value={current}
+              onChange={(e) => setCurrent(e.target.value)}
+              required
+              className={inputCls}
+            />
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-slate-700">New password</label>
-            <input type="password" value={next} onChange={(e) => setNext(e.target.value)} required className={inputCls} />
+            <input
+              type="password"
+              value={next}
+              onChange={(e) => setNext(e.target.value)}
+              required
+              className={inputCls}
+            />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">Confirm new password</label>
-            <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required className={inputCls} />
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">
+              Confirm new password
+            </label>
+            <input
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              required
+              className={inputCls}
+            />
           </div>
           {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
           <button

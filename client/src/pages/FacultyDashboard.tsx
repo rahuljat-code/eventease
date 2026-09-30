@@ -82,9 +82,7 @@ export function FacultyDashboard() {
           onClick={() => download("attendance")}
         />
         <ReportCard
-          icon={
-            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-          }
+          icon={<path d="M13 10V3L4 14h7v7l9-11h-7z" />}
           title="CC Points Sheet"
           description="One row per student with their total verified club CC points."
           disabled={!classId}
@@ -159,11 +157,7 @@ function ReportCard({
       </span>
       <h3 className="mt-3 font-semibold text-slate-900">{title}</h3>
       <p className="mt-1 flex-1 text-sm text-slate-500">{description}</p>
-      <button
-        onClick={onClick}
-        disabled={disabled || busy}
-        className="btn-primary mt-4 w-full"
-      >
+      <button onClick={onClick} disabled={disabled || busy} className="btn-primary mt-4 w-full">
         {busy ? "Preparing…" : "Download CSV"}
       </button>
     </div>

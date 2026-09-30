@@ -46,7 +46,13 @@ export default function Login() {
 
         <div className="card p-7 shadow-card">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Field label="Username" type="text" value={username} onChange={setUsername} placeholder="e.g. 24bit044" />
+            <Field
+              label="Username"
+              type="text"
+              value={username}
+              onChange={setUsername}
+              placeholder="e.g. 24bit044"
+            />
             <Field label="Password" type="password" value={password} onChange={setPassword} />
 
             {error && (

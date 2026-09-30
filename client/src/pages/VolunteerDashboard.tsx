@@ -43,7 +43,9 @@ export function VolunteerDashboard() {
                 <Info label="Class" value={user?.class?.name} />
                 <Info
                   label="Team"
-                  value={user?.team ? `${user.team.club.name} → ${user.team.name}` : "Not on a team yet"}
+                  value={
+                    user?.team ? `${user.team.club.name} → ${user.team.name}` : "Not on a team yet"
+                  }
                 />
               </div>
             </div>
@@ -65,8 +67,8 @@ export function VolunteerDashboard() {
             {user?.team ? (
               <p className="text-sm text-slate-600">
                 You are on <span className="font-medium text-slate-900">{user.team.name}</span> in{" "}
-                <span className="font-medium text-slate-900">{user.team.club.name}</span>. Your attendance
-                requests go to this team's head.
+                <span className="font-medium text-slate-900">{user.team.club.name}</span>. Your
+                attendance requests go to this team's head.
               </p>
             ) : (
               <p className="rounded-2xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
@@ -127,7 +129,7 @@ function PickTeamModal({ open, onClose }: { open: boolean; onClose: () => void }
       await refreshUser();
       onClose();
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     } finally {
       setBusy(false);
     }

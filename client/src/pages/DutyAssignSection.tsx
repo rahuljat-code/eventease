@@ -53,7 +53,7 @@ export function DutyAssignSection() {
       setEventId("");
       setAssignedToId("");
     } catch (err) {
-      setError(axios.isAxiosError(err) ? err.response?.data?.message ?? "Failed" : "Failed");
+      setError(axios.isAxiosError(err) ? (err.response?.data?.message ?? "Failed") : "Failed");
     } finally {
       setBusy(false);
     }
