@@ -103,7 +103,7 @@ function initialStatusFor(role: string): RequestStatus {
   return RequestStatus.PENDING_TEAM_HEAD;
 }
 
-const MAX_DAYS_FROM_EVENT = 7;
+const MAX_DAYS_FROM_EVENT = 15;
 const DAY_MS = 1000 * 60 * 60 * 24;
 
 function checkLectureDate(lectureDate: Date, eventDate: Date): string | null {

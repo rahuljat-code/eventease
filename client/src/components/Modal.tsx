@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 export function Modal({
   open,
@@ -12,7 +13,10 @@ export function Modal({
   children: ReactNode;
 }) {
   if (!open) return null;
-  return (
+  // Rendered through a portal to <body> so the fixed overlay is positioned
+  // relative to the viewport, not to any transformed/animated ancestor
+  // (otherwise the popup drifts to the top instead of centring).
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="absolute inset-0 animate-fade-in bg-slate-900/50 backdrop-blur-sm"
@@ -31,6 +35,7 @@ export function Modal({
         </div>
         <div className="overflow-y-auto px-6 pb-6">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

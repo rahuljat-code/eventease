@@ -156,6 +156,8 @@ function RequestModal({
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // Today's date (local) in yyyy-mm-dd, used to stop future lecture dates being picked.
+  const todayStr = new Date().toLocaleDateString("en-CA");
 
   useEffect(() => {
     if (!open) return;
@@ -254,6 +256,7 @@ function RequestModal({
             type="date"
             value={lectureDate}
             onChange={(e) => setLectureDate(e.target.value)}
+            max={todayStr}
             required
             className={INPUT}
           />
