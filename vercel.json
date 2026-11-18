@@ -15,5 +15,8 @@
     { "src": "/api/(.*)", "dest": "server/api/index.ts" },
     { "src": "/(.*\\.[a-zA-Z0-9]+)", "dest": "/client/$1" },
     { "src": "/(.*)", "dest": "/client/index.html" }
+  ],
+  "crons": [
+    { "path": "/api/keep-warm", "schedule": "0 6 * * *" }
   ]
 }

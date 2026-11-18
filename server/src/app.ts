@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import { prisma } from "./lib/prisma";
 import authRoutes from "./routes/auth";
 import classRoutes from "./routes/classes";
 import userRoutes from "./routes/users";
@@ -29,6 +30,19 @@ app.use(express.json());
 
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", message: "EventEase API is running" });
+});
+
+// Keep-warm ping. The Supabase free tier pauses the project after ~1 week with
+// no database activity, which takes the whole API down. A daily Vercel Cron hits
+// this endpoint (see vercel.json); the trivial query resets that inactivity
+// timer so the project never goes idle long enough to pause.
+app.get("/api/keep-warm", async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: "ok", db: "awake" });
+  } catch {
+    res.status(500).json({ status: "error", db: "unreachable" });
+  }
 });
 
 app.use("/api/auth", authRoutes);
